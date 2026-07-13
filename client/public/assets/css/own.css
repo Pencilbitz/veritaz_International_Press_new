@@ -1,0 +1,62 @@
+.content1 {
+  background-color: #f7f7f7; /* Light grey background */
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content1 ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0; /* Ensure no extra margin around the list */
+}
+
+.content1 li {
+  background-color: #004D7A; /* Green background for list items */
+  color: white;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+}
+
+.content1 li:hover {
+  background-color: #45a049; /* Darker green on hover */
+  cursor: pointer;
+}
+
+ .custom-icons a {
+       
+        padding: 10px;
+        border-radius: 50%;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+
+    /* WhatsApp icon with border and hover effect */
+    .custom-icons a i.fa-whatsapp {
+        color: #25D366; /* WhatsApp green */
+       /* Border matches the WhatsApp color */
+        font-size: 24px;
+        padding:10px;
+    }
+
+    .custom-icons a:hover i.fa-whatsapp {
+        background-color: #25D366;
+        color: white;
+         padding:10px;
+    }
+
+    /* Phone icon with border and hover effect */
+    .custom-icons a i.fa-phone-alt {
+        color: #007bff; /* Blue for phone */
+       /* Border matches the phone color */
+        font-size: 24px;
+         padding:10px;
+    }
+
+    .custom-icons a:hover i.fa-phone-alt {
+        background-color: #007bff;
+        color: white;
+         padding:10px;
+    }

@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Dr. K. Baskar",
+    "designation": "Chief Operations Officer",
+    "phone": "+91 9344810452",
+    "email": "",
+    "photo": "assets/image/Team/Baskar-Sri.jpeg"
+  },
+  {
+    "name": "Logeshwari Rajan",
+    "designation": "Assistant Senior Manager",
+    "phone": "+91 6380658876",
+    "email": "logeshwari.veritaz@gmail.com",
+    "photo": "assets/image/Team/Logeshwari.jpeg"
+  },
+  {
+    "name": "Shahin",
+    "designation": "BD Manager - Patent",
+    "phone": "+91 9003025706",
+    "email": "patent.bbinternational@gmail.com",
+    "photo": "assets/image/Team/Shahin.jpeg"
+  },
+  {
+    "name": "Dharani Priya S",
+    "designation": "BD Associate - Textbook",
+    "phone": "+91 8925812274",
+    "email": "dharanipriyaa.veritaz@gmail.com",
+    "photo": "assets/image/Team/Dharani Priya .jpeg"
+  },
+  {
+    "name": "Arikaran VG",
+    "designation": "BD Associate - Textbook",
+    "phone": "+91 8925812272",
+    "email": "arikaran.veritaz@gmail.com",
+    "photo": "assets/image/Team/Arikaran VG.jpeg"
+  },
+  {
+    "name": "Deepika P",
+    "designation": "BD Associate - Event",
+    "phone": "+91 8925812276",
+    "email": "deepika.veritaz@gmail.com",
+    "photo": "assets/image/Team/Deepika.jpeg"
+  },
+  {
+    "name": "Manigandan B",
+    "designation": "BD Associate - Event",
+    "phone": "+91 8925812271",
+    "email": "manigandan.veritaz@gmail.com",
+    "photo": "assets/image/Team/Manigandan-new.jpeg"
+  }
+]

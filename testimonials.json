@@ -1,0 +1,38 @@
+[
+  {
+    "name": "Dr. Sarah Jenkins",
+    "role": "Professor",
+    "department": "Computer Science",
+    "college": "MIT Institute of Technology",
+    "bookName": "Advanced Computing Trends",
+    "location": "Boston, MA",
+    "rating": 5,
+    "description": "An excellent resource for our faculty. The quality of publications and events organized by Pencilbitz is outstanding.",
+    "photo": "https://randomuser.me/api/portraits/women/44.jpg",
+    "status": "Active"
+  },
+  {
+    "name": "Prof. David Chen",
+    "role": "Head of Department",
+    "department": "Electrical Engineering",
+    "college": "Stanford University",
+    "bookName": "Modern VLSI Design",
+    "location": "Stanford, CA",
+    "rating": 4,
+    "description": "Great conference organization and the book publication process was very smooth and professional.",
+    "photo": "https://randomuser.me/api/portraits/men/32.jpg",
+    "status": "Active"
+  },
+  {
+    "name": "Dr. Emily Robertson",
+    "role": "Assistant Professor",
+    "department": "Mechanical Engineering",
+    "college": "University of Michigan",
+    "bookName": "",
+    "location": "Ann Arbor, MI",
+    "rating": 5,
+    "description": "The Faculty Development Program was highly insightful. I look forward to attending more events in the future.",
+    "photo": "https://randomuser.me/api/portraits/women/68.jpg",
+    "status": "Active"
+  }
+]

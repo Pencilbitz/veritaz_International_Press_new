@@ -1,0 +1,315 @@
+@media (min-width:1440px){
+/* ---start book home page --- */
+.container-books {
+    background-color: #F6F6F8;
+  margin: 0 auto;
+  padding: 20px;
+  
+}
+.bookstitel{
+margin-left: 5%;
+}
+.bookstitel img {
+    width: 7%;
+    border: none;
+    margin-bottom: 1%;
+}
+.bookstitel h1 {
+    margin: 0;
+    font-size: 3rem;
+    color: #222;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.bookstitel h4{
+    text-align: center;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color:#F05A7E;
+    margin-bottom: 15px;
+}
+.bookstitel h3 {
+    text-align:start;
+    margin: 0;
+    font-size: 3.2rem;
+    font-weight: 500;
+    color:#6AD4DD;
+    margin-bottom: 15px;
+}
+
+.bookstitel p {
+    text-align: justify;
+    font-size: 1.3rem;
+    color: #444;
+    line-height: 1.5;
+}
+.bookstitel button{
+    margin-top: 15px;
+    background-color: #EF3C6E;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.bookstitel button:hover {
+    background-color: #da2458;
+}
+.bookstitel i{
+    font-size: 1rem;
+    color: #EF3C6E;
+}
+.bookstitel .p{
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
+.booksimg img {
+    width: 75%;
+    height: auto;
+    border: none;
+    margin-left: 15%;
+}
+
+/* -----End book home page*/
+
+}
+
+@media (min-width:1024px) and (max-width: 1439px){
+/* ---start book home page --- */
+.container-books {
+    background-color: #F6F6F8;
+  margin: 0 auto;
+  padding: 20px;
+  
+}
+.bookstitel{
+margin-left: 3%;
+}
+.bookstitel img {
+    width: 7%;
+    border: none;
+    margin-bottom: 1%;
+}
+.bookstitel h1 {
+    margin: 0;
+    font-size: 2.8rem;
+    color: #222;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.bookstitel h4{
+    text-align: center;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color:#F05A7E;
+    margin-bottom: 15px;
+}
+.bookstitel h3 {
+    text-align:start;
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 500;
+    color:#6AD4DD;
+    margin-bottom: 15px;
+}
+
+.bookstitel p {
+    text-align: justify;
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.5;
+}
+.bookstitel button{
+    margin-top: 15px;
+    background-color: #EF3C6E;
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.bookstitel button:hover {
+    background-color: #da2458;
+}
+.bookstitel i{
+    font-size: 1rem;
+    color: #EF3C6E;
+}
+.bookstitel .p{
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
+.booksimg img {
+    width: 85%;
+    height: auto;
+    border: none;
+    margin-left: 15%;
+}
+
+/* -----End book home page*/
+
+}
+
+@media (min-width:427px) and (max-width: 769px){
+/* ---start book home page --- */
+.container-books {
+    background-color: #F6F6F8;
+  margin: 0 auto;
+  padding: 20px;
+  
+}
+.bookstitel{
+margin-left: 3%;
+}
+.bookstitel img {
+    width: 8%;
+    border: none;
+    margin-bottom: 1%;
+}
+.bookstitel h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    color: #222;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.bookstitel h4{
+    text-align: center;
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+    color:#F05A7E;
+    margin-bottom: 15px;
+}
+.bookstitel h3 {
+    text-align:start;
+    margin: 0;
+    font-size: 2.1rem;
+    font-weight: 500;
+    color:#6AD4DD;
+    margin-bottom: 15px;
+}
+
+.bookstitel p {
+    text-align: justify;
+    font-size: 1rem;
+    color: #444;
+    line-height: 1.5;
+}
+.bookstitel button{
+    margin-top: 15px;
+    background-color: #EF3C6E;
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.bookstitel button:hover {
+    background-color: #da2458;
+}
+.bookstitel i{
+    font-size: 1rem;
+    color: #EF3C6E;
+}
+.bookstitel .p{
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.5;
+}
+.booksimg img {
+    width: 100%;
+    height: auto;
+    border: none;
+    margin-left: 15%;
+    margin-top: 25px;
+}
+
+/* -----End book home page*/
+
+}
+
+@media (min-width:320px) and (max-width: 426px){
+/* ---start book home page --- */
+.container-books {
+    background-color: #F6F6F8;
+  margin: 0 auto;
+  padding: 3px;
+  
+}
+.bookstitel{
+}
+.bookstitel img {
+    width: 12%;
+    border: none;
+    margin-bottom: 1%;
+}
+.bookstitel h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #222;
+    font-weight: 500;
+    margin-bottom: 15px;
+}
+.bookstitel h4{
+    text-align: center;
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 500;
+    color:#F05A7E;
+    margin-bottom: 15px;
+}
+.bookstitel h3 {
+    text-align:start;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color:#6AD4DD;
+    margin-bottom: 15px;
+}
+
+.bookstitel p {
+    text-align: justify;
+    font-size: 0.8rem;
+    color: #444;
+    line-height: 1.4;
+}
+.bookstitel button{
+    margin-top: 15px;
+    background-color: #EF3C6E;
+    color: white;
+    border: none;
+    padding: 7px 15px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 5px;
+}
+.bookstitel button:hover {
+    background-color: #da2458;
+}
+.bookstitel i{
+    font-size: 1rem;
+    color: #EF3C6E;
+}
+.bookstitel .p{
+    font-size: 0.8rem;
+    color: #555;
+    line-height: 1.5;
+}
+.booksimg img {
+    width: 100%;
+    height: auto;
+    border: none;
+    margin-top: 25px;
+}
+
+/* -----End book home page*/
+
+}

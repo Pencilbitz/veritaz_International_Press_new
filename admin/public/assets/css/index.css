@@ -1,0 +1,332 @@
+@media (min-width: 1440px) {
+    body {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    .container-homepage {
+        background-image: url(../img/PB-remove-4.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .container-homepage,
+    .hometitel {
+        padding-left: 10%;
+        padding-top: 25px;
+    }
+
+    .hometitel h4 {
+        padding-left: 9%;
+        padding-bottom: 15px;
+        color: #555;
+        font-size: 3rem;
+    }
+
+    .hometitel h1 {
+        padding-left: 4%;
+        padding-top: 15px;
+        font-size: 3.5rem;
+    }
+
+    .hometitel p {
+        padding-left: 6%;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel {
+        padding-left: 6%;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h4 {
+        padding-left: 6%;
+        font-size: 3rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h1 {
+        padding-left: 5%;
+        font-size: 3.2rem;
+    }
+
+    .penciltitel p {
+        padding-left: 6%;
+        font-size: 1.3rem;
+        line-height: 1.6;
+    }
+
+    .pencilimg img {
+        border-radius: 10px;
+        border: none;
+
+    }
+
+    .row-books h4 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+        padding-bottom: 2%;
+    }
+
+    .row-books h2 {
+        font-size: 1.5rem;
+        color: #555;
+        line-height: 1.5;
+        padding: 0 25px;
+        margin-bottom: 15px;
+    }
+}
+
+
+
+@media (min-width: 770px) and (max-width: 1439px) {
+
+    .container,
+    .homepage {
+        background-image: url(../img/PB-remove-4.jpg);
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .homepage {
+        padding-left: 8%;
+        padding-top: 25px;
+    }
+
+    .hometitel {
+        position: relative;
+        padding-left: 8%;
+        padding-top: 25px;
+    }
+
+    .hometitel h4 {
+        padding-left: 12%;
+        padding-bottom: 15px;
+        color: #555;
+        font-size: 2.rem;
+    }
+
+    .home-p {
+        padding-left: 6%;
+        font-size: 1.1rem;
+        text-align: justify;
+        line-height: 1.5;
+        color: #555;
+    }
+
+    .penciltitel {
+        padding-left: 6%;
+        font-size: 1.2rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h4 {
+        padding-left: 6%;
+        font-size: 2.5rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h1 {
+        padding-left: 5%;
+        font-size: 2.5rem;
+    }
+
+    .penciltitel p {
+        padding-left: 6%;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .pencilimg img {
+        border-radius: 7px;
+        border: none;
+        width: 100%;
+        height: auto;
+
+    }
+
+    .row-books h4 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 600;
+        padding-bottom: 2%;
+    }
+
+    .row-books h2 {
+        font-size: 1.5rem;
+        color: #555;
+        line-height: 1.6;
+        padding: 0 25px;
+        margin-bottom: 15px;
+    }
+
+}
+
+@media (min-width: 427px) and (max-width: 769px) {
+    .container-homepage {
+        background-image: url(../img/PB-remove-4.jpg);
+        background-size: small;
+        background-repeat: no-repeat;
+    }
+
+    .container-homepage,
+    .hometitel {
+        padding-left: 15%;
+        padding-top: 5px;
+    }
+
+    .hometitel h4 {
+        color: #555;
+        font-size: 1.5rem;
+        margin-left: 35px;
+    }
+
+    .hometitel h1 {
+        font-size: 2rem;
+        padding-top: 0px;
+
+    }
+
+    .hometitel p {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .penciltitel h4 {
+        padding-left: 6%;
+        font-size: 2rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h1 {
+        font-size: 2rem;
+    }
+
+    .penciltitel p {
+        padding-left: 6%;
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .pencilimg img {
+        border-radius: 7px;
+        border: none;
+        width: 100%;
+        height: auto;
+
+    }
+
+    .row-books h4 {
+        text-align: center;
+        font-size: 1.8rem;
+
+        padding-bottom: 2%;
+    }
+
+    .row-books h2 {
+        font-size: 1.4rem;
+        color: #555;
+        line-height: 1.5;
+        padding: 0 25px;
+        margin-bottom: 15px;
+    }
+
+
+}
+
+@media (min-width:320px) and (max-width: 426px) {
+    .container-homepage {
+        background-image: url(../img/PB-remove-4.jpg);
+        background-repeat: no-repeat;
+        background-size: small;
+    }
+
+    .container-homepage,
+    .hometitel {
+        padding-left: 3%;
+    }
+
+    .hometitel h4 {
+        text-align: center;
+        padding-top: 10px;
+        color: #333;
+        font-size: 25px;
+    }
+
+    .hometitel h1 {
+        font-size: 30px;
+        text-align: center;
+
+    }
+
+    .hometitel p {
+        text-align: justify;
+        line-height: 1.2;
+        font-size: 15px;
+        color: rgb(29, 28, 28);
+    }
+
+    .book-cover {
+        background-color: #cfd1cd;
+    }
+
+    .book-cover img {
+        width: 100%;
+        height: auto;
+    }
+
+    .pencilimg img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: none;
+    }
+
+    .penciltitel h4 {
+        padding-left: 0%;
+        font-size: 2rem;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .penciltitel h1 {
+        padding-left: 0%;
+        font-size: 2rem;
+    }
+
+    .penciltitel p {
+        text-align: justify;
+        padding-left: 0%;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+
+    .row-books h4 {
+        text-align: center;
+        font-size: 1.6rem;
+        padding-bottom: 2%;
+    }
+
+    .row-books h2 {
+        font-size: 1.2rem;
+        color: #555;
+        line-height: 1.5;
+        padding: 0 25px;
+        margin-bottom: 15px;
+    }
+
+
+
+
+}
