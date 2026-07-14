@@ -15,17 +15,7 @@ export const statsData = [
   },
   {
     id: 2,
-    title: 'Edited Books',
-    value: 45,
-    growth: '+3 this month',
-    growthPercent: 7.1,
-    trend: 'up',
-    icon: 'edited',
-    color: 'sky',
-  },
-  {
-    id: 3,
-    title: 'Events & Conferences',
+    title: 'Events',
     value: 12,
     growth: '4 upcoming',
     growthPercent: 12.0,
@@ -34,8 +24,8 @@ export const statsData = [
     color: 'indigo',
   },
   {
-    id: 4,
-    title: 'Job Applications',
+    id: 3,
+    title: 'Conferences',
     value: 156,
     growth: '+18 this month',
     growthPercent: 13.0,
@@ -44,7 +34,7 @@ export const statsData = [
     color: 'blue',
   },
   {
-    id: 5,
+    id: 4,
     title: 'Testimonials',
     value: 48,
     growth: '+5 this month',
@@ -52,17 +42,7 @@ export const statsData = [
     trend: 'up',
     icon: 'star',
     color: 'amber',
-  },
-  {
-    id: 6,
-    title: 'Total Visitors',
-    value: 8942,
-    growth: '+342 this month',
-    growthPercent: 4.0,
-    trend: 'up',
-    icon: 'eye',
-    color: 'purple',
-  },
+  }
 ];
 
 export const booksData = [
