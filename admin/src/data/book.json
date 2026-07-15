@@ -15,8 +15,8 @@
     "format": "Single Color",
     "pages": 532,
     "copyright": "2026",
-    "cover1": "/uploads/books/The Employability Edge p1.png",
-    "cover2": "/uploads/books/The Employability Edge p2.png"
+    "cover1": "/assets/image/books/The Employability Edge p1.png",
+    "cover2": "/assets/image/books/The Employability Edge p2.png"
   },
   {
     "title": "Molecular Biology and Genetic Engineering",
@@ -34,8 +34,8 @@
     "format": "Single Color",
     "pages": 364,
     "copyright": "2026",
-    "cover1": "/uploads/books/Molecular Biology and Genetic Engineering p1.png",
-    "cover2": "/uploads/books/Molecular Biology and Genetic Engineering p2.png"
+    "cover1": "/assets/image/books/Molecular Biology and Genetic Engineering p1.png",
+    "cover2": "/assets/image/books/Molecular Biology and Genetic Engineering p2.png"
   },
   {
     "title": "Artificial Intelligence and Machine Learning in Cloud Applications",
@@ -53,8 +53,8 @@
     "format": "Single Color",
     "pages": 189,
     "copyright": "2026",
-    "cover1": "/uploads/books/Artifical Intelligence and Machine Learning in cloud Applications p1.png",
-    "cover2": "/uploads/books/Artifical Intelligence and Machine Learning in cloud Applications p2.png"
+    "cover1": "/assets/image/books/Artifical Intelligence and Machine Learning in cloud Applications p1.png",
+    "cover2": "/assets/image/books/Artifical Intelligence and Machine Learning in cloud Applications p2.png"
   },
   {
     "title": "Principles of Quantum Computation and Information Processing",
@@ -72,8 +72,8 @@
     "format": "Single Color",
     "pages": 207,
     "copyright": "2026",
-    "cover1": "/uploads/books/Principles of Quantum Computation and Information Processing p1.png",
-    "cover2": "/uploads/books/Principles of Quantum Computation and Information Processing p2.png"
+    "cover1": "/assets/image/books/Principles of Quantum Computation and Information Processing p1.png",
+    "cover2": "/assets/image/books/Principles of Quantum Computation and Information Processing p2.png"
   },
   {
     "title": "Network Security and Cryptography: Principles, Protocols, and Practices",
@@ -91,8 +91,8 @@
     "format": "Single Color",
     "pages": 151,
     "copyright": "2026",
-    "cover1": "/uploads/books/Network Security and Cryptography p1.png",
-    "cover2": "/uploads/books/Network Security and Cryptography p2.png"
+    "cover1": "/assets/image/books/Network Security and Cryptography p1.png",
+    "cover2": "/assets/image/books/Network Security and Cryptography p2.png"
   },
   {
     "title": "Data Structures: Concepts and Implementations",
@@ -110,8 +110,8 @@
     "format": "Single Color",
     "pages": 207,
     "copyright": "2026",
-    "cover1": "/uploads/books/Data Structures-Concepts and Implementations p1.png",
-    "cover2": "/uploads/books/Data Structures-Concepts and Implementations p2.png"
+    "cover1": "/assets/image/books/Data Structures-Concepts and Implementations p1.png",
+    "cover2": "/assets/image/books/Data Structures-Concepts and Implementations p2.png"
   },
   {
     "title": "Foundation of Quantum Computing",
@@ -129,8 +129,8 @@
     "format": "Single Color",
     "pages": 	311,
     "copyright": "2026",
-    "cover1": "/uploads/books/Foundation of Quantum Computing p1.png",
-    "cover2": "/uploads/books/Foundation of Quantum Computing p2.png"
+    "cover1": "/assets/image/books/Foundation of Quantum Computing p1.png",
+    "cover2": "/assets/image/books/Foundation of Quantum Computing p2.png"
   },
   {
     "title": "Advanced Machine Learning Techniques for Modern Applications",
@@ -148,8 +148,8 @@
     "format": "Single Color",
     "pages": 	405,
     "copyright": "2026",
-    "cover1": "/uploads/books/Advanced Machine Learning Techniques for Modern Applications p1.png",
-    "cover2": "/uploads/books/Advanced Machine Learning Techniques for Modern Applications p2.png"
+    "cover1": "/assets/image/books/Advanced Machine Learning Techniques for Modern Applications p1.png",
+    "cover2": "/assets/image/books/Advanced Machine Learning Techniques for Modern Applications p2.png"
   },
   {
     "title": "Modern Research in Chemical Sciences: Emerging Trends and Innovation",
@@ -167,8 +167,8 @@
     "format": "Single Color",
     "pages": 	347,
     "copyright": "2026",
-    "cover1": "/uploads/books/Modern Research in Chemical Sciences p1.png",
-    "cover2": "/uploads/books/Modern Research in Chemical Sciences p2.png"
+    "cover1": "/assets/image/books/Modern Research in Chemical Sciences p1.png",
+    "cover2": "/assets/image/books/Modern Research in Chemical Sciences p2.png"
   },
   {
     "title": "Chemical Process Safety",
@@ -186,7 +186,7 @@
     "format": "Single Color",
     "pages": 	280,
     "copyright": "2026",
-    "cover1": "/uploads/books/Chemical Process Safety p1.png",
-    "cover2": "/uploads/books/Chemical Process Safety p2.png"
+    "cover1": "/assets/image/books/Chemical Process Safety p1.png",
+    "cover2": "/assets/image/books/Chemical Process Safety p2.png"
   }
 ]

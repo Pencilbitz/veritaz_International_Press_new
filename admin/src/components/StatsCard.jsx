@@ -111,14 +111,7 @@ const StatsCard = ({ stat, index, onClick }) => {
         <p className="text-2xl font-extrabold text-brand-dark mt-0.5">
           {count.toLocaleString()}
         </p>
-        <div className={`inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full text-xs font-semibold ${colors.badge}`}>
-          {stat.trend === 'up' ? (
-            <MdTrendingUp className="text-sm" />
-          ) : (
-            <MdTrendingDown className="text-sm" />
-          )}
-          {stat.growth}
-        </div>
+        
       </div>
     </motion.div>
   );

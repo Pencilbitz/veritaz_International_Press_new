@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -12,10 +12,8 @@ import {
 import { FaBookOpen } from 'react-icons/fa';
 
 import StatsCard from '../components/StatsCard';
-import {
-  statsData, booksData, testimonialsData,
-  monthlyChartData, categoryData, recentActivities,
-} from '../data/dummyData';
+
+import axios from 'axios';
 
 const activityIcons = {
   book: <MdMenuBook className="text-blue-600 text-base" />,
@@ -89,6 +87,75 @@ const Dashboard = () => {
 
   const statPieData = getStatPieData(selectedStatCard);
 
+  const API = "http://localhost:5000/api";
+
+const [booksData, setBooksData] = useState([]);
+const [eventsData, setEventsData] = useState([]);
+const [conferencesData, setConferencesData] = useState([]);
+const [testimonialsData, setTestimonialsData] = useState([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  fetchDashboardData();
+}, []);
+
+const fetchDashboardData = async () => {
+  try {
+    const [
+      booksRes,
+      eventsRes,
+      conferencesRes,
+      testimonialsRes,
+    ] = await Promise.all([
+      axios.get(`${API}/books`),
+      axios.get(`${API}/events`),
+      axios.get(`${API}/conferences`),
+      axios.get(`${API}/testimonials`)
+    ]);
+
+    setBooksData(booksRes.data);
+    setEventsData(eventsRes.data);
+    setConferencesData(conferencesRes.data);
+    setTestimonialsData(testimonialsRes.data);
+
+    setLoading(false);
+  } catch (err) {
+    console.error(err);
+    setLoading(false);
+  }
+};
+
+const statsData = [
+  {
+    id: 1,
+    title: "Books",
+    value: booksData.length,
+    icon: <MdMenuBook />,
+    color: "#2563EB"
+  },
+  {
+    id: 2,
+    title: "Events",
+    value: eventsData.length,
+    icon: <MdEvent />,
+    color: "#3B82F6"
+  },
+  {
+    id: 3,
+    title: "Conferences",
+    value: conferencesData.length,
+    icon: <MdGroups />,
+    color: "#8B5CF6"
+  },
+  {
+    id: 4,
+    title: "Testimonials",
+    value: testimonialsData.length,
+    icon: <MdStar />,
+    color: "#E11D48"
+  }
+];
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -146,7 +213,7 @@ const Dashboard = () => {
                     <td className="table-td">
                       <div className="flex items-center gap-3">
                         <img
-                          src={book.cover}
+                          src={book.cover1}
                           alt={book.title}
                           className="w-8 h-10 rounded-md object-cover shadow-card"
                           onError={(e) => { e.target.src = 'https://via.placeholder.com/32x40?text=B'; }}
@@ -154,7 +221,7 @@ const Dashboard = () => {
                         <span className="font-medium text-brand-dark text-xs line-clamp-2 max-w-[140px]">{book.title}</span>
                       </div>
                     </td>
-                    <td className="table-td text-xs text-brand-gray">{book.author}</td>
+                    <td className="table-td text-xs text-brand-gray">{book.authors}</td>
                     <td className="table-td font-semibold text-brand-dark text-xs">₹{book.price.toLocaleString()}</td>
                     <td className="table-td">
                       <span className={book.status === 'Published' ? 'badge-published' : 'badge-draft'}>
@@ -200,14 +267,14 @@ const Dashboard = () => {
             >
               <div className="flex items-center gap-3 mb-3">
                 <img
-                  src={t.photo}
+                  src={t.avatar_url}
                   alt={t.name}
                   className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-200"
                   onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=2563EB&color=fff`; }}
                 />
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-brand-dark truncate">{t.name}</p>
-                  <p className="text-xs text-brand-gray truncate">{t.role}</p>
+                  <p className="text-xs text-brand-gray truncate">{t.designation}</p>
                 </div>
               </div>
               <div className="flex gap-0.5 mb-2">
@@ -215,7 +282,7 @@ const Dashboard = () => {
                   <MdStar key={s} className={s <= t.rating ? 'star-active text-sm' : 'star-inactive text-sm'} />
                 ))}
               </div>
-              <p className="text-xs text-brand-gray line-clamp-3">"{t.description}"</p>
+              <p className="text-xs text-brand-gray line-clamp-3">"{t.content}"</p>
             </motion.div>
           ))}
         </div>

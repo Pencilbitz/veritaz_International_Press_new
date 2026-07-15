@@ -35,14 +35,33 @@ export const createBook = async (req, res) => {
 
 export const updateBook = async (req, res) => {
   try {
-    const affectedRows = await bookModel.updateBook(req.params.id, req.body);
-    if (affectedRows === 0) {
-      return res.status(404).json({ message: 'Book not found' });
+    // 1. Gather all text fields parsed by Multer
+    const updateData = { ...req.body };
+
+    // 2. Gather files if any were uploaded
+    if (req.files) {
+      if (req.files.cover1) {
+        // Construct path format matching your server's static files setup: e.g. "uploads/books/filename.jpg"
+        updateData.cover1 = `uploads/books/${req.files.cover1[0].filename}`;
+      }
+      if (req.files.cover2) {
+        updateData.cover2 = `uploads/books/${req.files.cover2[0].filename}`;
+      }
     }
-    res.status(200).json({ message: 'Book updated successfully' });
+
+    console.log("Parsed update payload:", updateData);
+
+    // 3. Forward the complete payload to the database model
+    const affectedRows = await bookModel.updateBook(req.params.id, updateData);
+
+    if (affectedRows === 0) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json({ message: "Book updated successfully" });
   } catch (error) {
-    console.error('Error updating book:', error);
-    res.status(500).json({ error: 'Server error updating book' });
+    console.error(error);
+    res.status(500).json({ error: "Server error updating book" });
   }
 };
 

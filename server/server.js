@@ -29,6 +29,7 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/assets', express.static(path.join(__dirname, '../client/public/assets')));
 
+
 // Routes
 app.use('/api/conferences', conferenceRoutes);
 app.use('/api/books', bookRoutes);

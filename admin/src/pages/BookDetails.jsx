@@ -6,6 +6,72 @@ import {
   MdPeopleOutline, MdCancel, MdStar
 } from 'react-icons/md';
 
+const handleUpdate = async (e) => {
+  e.preventDefault();
+  setUpdateLoading(true);
+
+  try {
+    const updatedData = { ...formData };
+
+    console.log("Original Form Data:", formData);
+    console.log("Selected Upload Files:", uploadFiles);
+
+    // Upload Cover 1
+    if (uploadFiles.cover1) {
+      const fd = new FormData();
+      fd.append("image", uploadFiles.cover1);
+
+      const res = await axios.post(
+        "http://localhost:5000/api/upload/books",
+        fd
+      );
+
+      console.log("Cover1 Upload Response:", res.data);
+
+      updatedData.cover1 = res.data.url;
+    }
+
+    // Upload Cover 2
+    if (uploadFiles.cover2) {
+      const fd = new FormData();
+      fd.append("image", uploadFiles.cover2);
+
+      const res = await axios.post(
+        "http://localhost:5000/api/upload/books",
+        fd
+      );
+
+      console.log("Cover2 Upload Response:", res.data);
+
+      updatedData.cover2 = res.data.url;
+    }
+
+    console.log("Final Updated Data:", updatedData);
+
+    const response = await axios.put(
+      `http://localhost:5000/api/books/${id}`,
+      updatedData
+    );
+
+    console.log("Update API Response:", response.data);
+
+    alert("Book updated successfully!");
+    navigate("/admin/books");
+
+  } catch (err) {
+    console.error("Update Error:", err);
+
+    if (err.response) {
+      console.log("Status:", err.response.status);
+      console.log("Response:", err.response.data);
+    }
+
+    alert(err.response?.data?.message || "Update failed");
+  } finally {
+    setUpdateLoading(false);
+  }
+};
+
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -143,6 +209,7 @@ const BookDetails = () => {
 
   if (loading) return <div className="p-8 text-center text-brand-gray">Reading Book Data...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
+  
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
@@ -230,7 +297,7 @@ const BookDetails = () => {
                   <label className="block text-xs font-bold text-gray-600 uppercase mb-1 flex items-center gap-1">
                     <MdStar className="text-yellow-500" /> Default Ratings (1-5)
                   </label>
-                  <input type="number" min="1" max="5" name="ratings" value={formData.ratings} onChange={handleChange} className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" />
+                  <input type="decimal" min="1" max="5" name="ratings" value={formData.ratings} onChange={handleChange} className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 

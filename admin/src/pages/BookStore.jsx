@@ -47,8 +47,8 @@ const BookStore = () => {
 
   // Filtered logic aligning with fields from database schema
   const filtered = books.filter((b) => {
-    const matchSearch = !search || 
-      (b.title && b.title.toLowerCase().includes(search.toLowerCase())) || 
+    const matchSearch = !search ||
+      (b.title && b.title.toLowerCase().includes(search.toLowerCase())) ||
       (b.author && b.author.toLowerCase().includes(search.toLowerCase())) ||
       (b.isbn && b.isbn.includes(search));
     const matchAuthor = !filterAuthor || b.author === filterAuthor;
@@ -236,7 +236,7 @@ const BookStore = () => {
             {authorsList.map((a) => <option key={a}>{a}</option>)}
           </select>
 
-          
+
 
           {/* View Toggle */}
           <div className="flex items-center gap-1 bg-brand-bg border border-brand-border rounded-xl p-1">
@@ -351,7 +351,7 @@ const BookStore = () => {
                           <p className="text-[10px] text-brand-gray font-mono">
                             ISBN: {book.isbn ? String(book.isbn).slice(-6) : 'N/A'}
                           </p>
-                          
+
                         </div>
                         <p className="font-bold text-sm text-blue-600">
                           ₹{Number(book.price || 0).toLocaleString()}
@@ -427,7 +427,7 @@ const BookStore = () => {
                                   book.cover1
                                     ? book.cover1.startsWith("http")
                                       ? book.cover1
-                                      : `http://localhost:5000${book.cover1}`
+                                      : `http://localhost:5000${book.cover1.startsWith('/') ? '' : '/'}${book.cover1}`
                                     : "https://placehold.co/40x60?text=Book"
                                 }
                                 className="w-10 h-14 rounded object-cover shadow-sm shrink-0"
@@ -440,7 +440,7 @@ const BookStore = () => {
                                 <p className="font-semibold text-brand-dark text-sm line-clamp-1">
                                   {book.title}
                                 </p>
-                                
+
                               </div>
                             </div>
                           </td>
@@ -453,7 +453,7 @@ const BookStore = () => {
                             {book.isbn || '—'}
                           </td>
 
-                          
+
 
                           <td className="table-td font-semibold text-sm text-brand-dark">
                             ₹{Number(book.price || 0).toLocaleString()}
