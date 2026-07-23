@@ -104,7 +104,7 @@ export default function Events() {
                                         className="block bg-gray-200 overflow-hidden"
                                     >
                                         <img
-                                            src={event.poster?.startsWith('http') ? event.poster : `http://localhost:5000${event.poster}`}
+                                            src={`${event.poster}`}
                                             alt={event.eventTitle || "Upcoming Event"}
                                             className="w-full h-auto block"
                                             onError={(e) => { e.target.src = "https://placehold.co/300x450/EEE/31343C?text=No+Poster" }}

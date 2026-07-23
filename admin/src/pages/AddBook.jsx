@@ -53,7 +53,8 @@ const AddBook = () => {
       title: '',
       isbn: '',
       edition: '1st Edition',
-      ratings: 5,
+      ratings: 4.5,
+      flipkart: '',
       price: '',
       status: 'In Stock',
       weight: '180g',
@@ -68,7 +69,7 @@ const AddBook = () => {
   });
 
   const stepFields = {
-    1: ['title', 'isbn', 'edition', 'price', 'status', 'ratings'],
+    1: ['title', 'isbn', 'edition', 'price', 'status', 'ratings', 'flipkart'],
     2: [],
     3: ['about'],
     4: ['language', 'binding', 'pages', 'dimensions', 'weight', 'format', 'copyright'],
@@ -112,6 +113,7 @@ const AddBook = () => {
       isbn: data.isbn || '',
       edition: data.edition || '',
       ratings: Number(data.ratings) || 5,
+      flipkart: data.flipkart || '',
       about: data.about || '',
       price: data.price ? Number(data.price) : 0,
       status: explicitStatus || data.status || 'In Stock',
@@ -223,13 +225,13 @@ const AddBook = () => {
       <div className="card p-6">
         <form onSubmit={(e) => e.preventDefault()}>
           <AnimatePresence mode="wait">
-            
+
             {/* Step 1: Core Database Fields */}
             {currentStep === 1 && (
               <motion.div key="step1" variants={stepVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3 }}>
                 <h2 className="section-title mb-1">Basic Information</h2>
                 <p className="section-subtitle mb-5">Setup critical backend catalog info</p>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label className="label">Book Title *</label>
@@ -299,6 +301,15 @@ const AddBook = () => {
                     <label className="label">Product Initial Rating (1-5)</label>
                     <input {...register('ratings')} type="number" min="1" max="5" className="input-field" />
                   </div>
+                  <div className="sm:col-span-2">
+                    <label className="label">Flipkart Link</label>
+                    <input
+                      {...register('flipkart')}
+                      type="url"
+                      className="input-field"
+                      placeholder="https://www.flipkart.com/..."
+                    />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -309,7 +320,7 @@ const AddBook = () => {
                 <h2 className="section-title mb-1">Upload Media Covers</h2>
                 <p className="section-subtitle mb-5">Provide front and secondary asset pictures</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
+
                   {/* Front Cover -> mapped to cover1 column */}
                   <div>
                     <label className="label mb-2 block">Cover 1 Image (Front Cover)</label>

@@ -24,6 +24,6 @@ router.put('/:id',
   ]), 
   updateBook
 );
-delete('/:id', deleteBook);
+router.delete('/:id', deleteBook);
 
 export default router;

@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS books (
     copyright VARCHAR(50),                 -- Fixed: Corrected spelling
     cover1 VARCHAR(500),
     cover2 VARCHAR(500),
+    flipkart VARCHAR(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

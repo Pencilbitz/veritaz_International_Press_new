@@ -213,7 +213,7 @@ const statsData = [
                     <td className="table-td">
                       <div className="flex items-center gap-3">
                         <img
-                          src={book.cover1}
+                          src={`http://localhost:5000${book.cover1}`}
                           alt={book.title}
                           className="w-8 h-10 rounded-md object-cover shadow-card"
                           onError={(e) => { e.target.src = 'https://via.placeholder.com/32x40?text=B'; }}

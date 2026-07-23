@@ -187,7 +187,7 @@ const Events = () => {
                     </td>
                     <td className="table-td">
                       {evt.poster
-                        ? <img src={evt.poster.startsWith('http') ? evt.poster : `http://localhost:5000${evt.poster}`} className="w-10 h-12 object-cover rounded-lg shadow-sm" alt={evt.eventTitle} onError={(e) => e.target.src = "https://placehold.co/150x150/EEE/31343C"} />
+                        ? <img src={`${evt.poster}`} className="w-10 h-12 object-cover rounded-lg shadow-sm" alt={evt.eventTitle} onError={(e) => e.target.src = "https://placehold.co/150x150/EEE/31343C"} />
                         : <div className="w-10 h-12 rounded-lg bg-blue-50 flex items-center justify-center"><MdEvent className="text-blue-400" /></div>
                       }
                     </td>

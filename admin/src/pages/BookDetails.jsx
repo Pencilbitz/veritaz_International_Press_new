@@ -87,6 +87,7 @@ const BookDetails = () => {
     edition: "",
     ratings: 5,
     about: "",
+    flipkart: "",
     price: "",
     status: "In Stock",
     weight: "",
@@ -115,6 +116,7 @@ const BookDetails = () => {
           edition: res.data.edition || "",
           ratings: res.data.ratings ?? 5,
           about: res.data.about || "",
+          flipkart: res.data.flipkart || "",
           price: res.data.price || "",
           status: res.data.status || "In Stock",
           weight: res.data.weight || "",
@@ -209,7 +211,7 @@ const BookDetails = () => {
 
   if (loading) return <div className="p-8 text-center text-brand-gray">Reading Book Data...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
-  
+
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
@@ -334,7 +336,23 @@ const BookDetails = () => {
                   className="w-full text-sm text-brand-gray p-3 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                   placeholder="Provide book features or summaries description..."
                 />
+
+                <div className="mb-6">
+                  <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
+                    Flipkart Link
+                  </label>
+                  <input
+                    type="url"
+                    name="flipkart"
+                    value={formData.flipkart}
+                    onChange={handleChange}
+                    className="w-full text-sm p-3 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    placeholder="https://www.flipkart.com/your-book"
+                  />
+                </div>
               </div>
+
+
 
               {/* Submission Controls */}
               <div className="flex gap-4">

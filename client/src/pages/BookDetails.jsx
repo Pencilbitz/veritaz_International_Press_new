@@ -10,7 +10,7 @@ import { FaWhatsapp, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
 
 export default function BookDetails() {
   const { slug } = useParams(); // Maps to the API's book ID
-  
+
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ export default function BookDetails() {
       .then(data => {
         // Handle database array or object responses
         const bookData = Array.isArray(data) ? data[0] : data;
-        
+
         if (!bookData || bookData.message) {
           setError('Book not found');
         } else {
@@ -75,8 +75,8 @@ export default function BookDetails() {
   // WhatsApp checkout message generator
   const handleWhatsAppSubmit = (e) => {
     e.preventDefault();
-    const adminPhoneNumber = "919042007413"; 
-    
+    const adminPhoneNumber = "919042007413";
+
     let message = `New Order Request \n`;
     message += `-----------------------\n`;
     message += `Book: ${book.title}\n`;
@@ -104,30 +104,30 @@ export default function BookDetails() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+
           {/* Left Column - Images & Actions */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="bg-[#f0f4f8] rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm relative">
-              <img 
-                src={getImageUrl(currentImage || book.cover1)} 
-                alt={book.title} 
+              <img
+                src={getImageUrl(currentImage || book.cover1)}
+                alt={book.title}
                 className="w-full max-w-[280px] object-cover rounded-md shadow-2xl mb-8"
                 onError={(e) => { e.target.src = 'https://placehold.co/300x400/EEE/31343C?text=No+Cover'; }}
               />
-              
+
               <p className="text-sm font-semibold text-gray-800 mb-4">Book Preview</p>
-              
+
               {/* Image Previews */}
               <div className="flex items-center justify-center gap-3 mb-6">
                 {/* FIX 2: Updated references from book.cover to book.cover1 */}
-                <div 
+                <div
                   className={`w-16 h-20 rounded border-2 overflow-hidden shadow-md cursor-pointer bg-white ${currentImage === book.cover1 ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setCurrentImage(book.cover1)}
                 >
                   <img src={getImageUrl(book.cover1)} alt="Front Cover" className="w-full h-full object-cover" />
                 </div>
                 {/* FIX 3: Updated reference from book.backCover to book.cover2 */}
-                <div 
+                <div
                   className={`w-16 h-20 rounded border-2 overflow-hidden shadow-md cursor-pointer bg-white ${currentImage === book.cover2 ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setCurrentImage(book.cover2 || book.cover1)}
                 >
@@ -145,13 +145,13 @@ export default function BookDetails() {
               </div>
 
               <div className="flex items-center gap-3 w-full">
-                <button 
+                <button
                   onClick={() => setIsLightboxOpen(true)}
                   className="flex-1 bg-white border border-gray-200 rounded-lg py-2.5 flex items-center justify-center gap-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors shadow-sm"
                 >
                   <MdOutlineVisibility className="text-lg" /> Full Preview
                 </button>
-                <button 
+                <button
                   onClick={handleShare}
                   className="flex-1 bg-white border border-gray-200 rounded-lg py-2.5 flex items-center justify-center gap-2 text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors shadow-sm"
                 >
@@ -184,7 +184,7 @@ export default function BookDetails() {
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Authors</p>
                     {/* FIX 4: Corrected property from book.author to book.authors */}
-                    {book.authors ? book.authors.split('|').map((auth, idx) => (
+                    {book.authors ? book.authors.split(',').map((auth, idx) => (
                       <p key={idx} className="text-sm font-semibold text-gray-800 mb-1">{auth.trim()}</p>
                     )) : (
                       <p className="text-sm font-semibold text-gray-800 mb-1">Unknown Author</p>
@@ -235,6 +235,25 @@ export default function BookDetails() {
                   <span className="text-gray-500">views</span>
                 </div>
               </div>
+              {/* Flipkart Link */}
+              {book.flipkart && (
+                <div className="mb-6">
+                  <a
+                    href={book.flipkart}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-5 py-3 bg-[#2874F0] hover:bg-[#1f63d6] text-white rounded-xl font-semibold shadow-md transition-all duration-200"
+                  >
+                    <img
+                      src="https://logos-world.net/wp-content/uploads/2020/11/Flipkart-Logo.png"
+                      alt="Flipkart"
+                      className="w-auto h-8"
+                    />
+                    Buy on Flipkart
+                  </a>
+                </div>
+              )}
+            
 
               {/* About this Book */}
               <div className="mb-8">
@@ -272,7 +291,7 @@ export default function BookDetails() {
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-3 mb-6">
-                <button 
+                <button
                   onClick={() => setIsOrderModalOpen(true)}
                   className="w-full bg-[#16a34a] hover:bg-[#15803d] text-white rounded-xl py-3.5 px-4 font-bold flex items-center justify-between transition-colors shadow-sm"
                 >
@@ -282,15 +301,15 @@ export default function BookDetails() {
                   </div>
                   <MdArrowBack className="rotate-180" />
                 </button>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button 
+                  <button
                     onClick={() => setIsContactModalOpen(true)}
                     className="flex-1 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl py-2.5 font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                   >
                     <MdOutlineMenuBook /> Bulk/Institutional
                   </button>
-                  <button 
+                  <button
                     onClick={() => setIsLightboxOpen(true)}
                     className="flex-1 bg-white border border-purple-200 text-purple-600 hover:bg-purple-50 rounded-xl py-2.5 font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                   >
@@ -336,12 +355,12 @@ export default function BookDetails() {
         <div className="mt-6 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Product Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            
+
             <div className="grid grid-cols-3 border-b border-gray-50 pb-3">
               <div className="col-span-1 text-xs font-bold text-gray-500">Publisher</div>
               <div className="col-span-2 text-sm text-gray-800">{book.publisher || "Veritaz International Press"}</div>
             </div>
-            
+
             <div className="grid grid-cols-3 border-b border-gray-50 pb-3">
               <div className="col-span-1 text-xs font-bold text-gray-500">ISBN-13</div>
               <div className="col-span-2 text-sm text-gray-800">{book.isbn}</div>
@@ -394,15 +413,15 @@ export default function BookDetails() {
       {/* 1. Fullscreen Preview Lightbox Component */}
       {isLightboxOpen && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-          <button 
+          <button
             onClick={() => setIsLightboxOpen(false)}
             className="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
           >
             <MdClose size={24} />
           </button>
-          <img 
-            src={getImageUrl(currentImage || book.cover1)} 
-            alt="Fullscreen preview" 
+          <img
+            src={getImageUrl(currentImage || book.cover1)}
+            alt="Fullscreen preview"
             className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl"
           />
         </div>
@@ -419,7 +438,7 @@ export default function BookDetails() {
                 <MdClose size={20} />
               </button>
             </div>
-            
+
             <div className="p-6">
               <div className="flex items-center gap-3 mb-6 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/60">
                 <img src={getImageUrl(book.cover1)} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm bg-white" onError={(e) => { e.target.src = "https://placehold.co/50x70?text=No+Cover" }} />
@@ -432,29 +451,29 @@ export default function BookDetails() {
               <form onSubmit={handleWhatsAppSubmit} className="space-y-4">
                 <div>
                   <label className="block text-gray-700 text-xs font-bold uppercase tracking-wider mb-2">Your Name</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={custName}
                     onChange={(e) => setCustName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" 
-                    placeholder="Enter full name" 
-                    required 
+                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    placeholder="Enter full name"
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 text-xs font-bold uppercase tracking-wider mb-2">Delivery City / Pincode</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={custLocation}
                     onChange={(e) => setCustLocation(e.target.value)}
-                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" 
-                    placeholder="City, State, Pincode" 
-                    required 
+                    className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                    placeholder="City, State, Pincode"
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-gray-700 text-xs font-bold uppercase tracking-wider mb-2">Quantity</label>
-                  <select 
+                  <select
                     value={custQty}
                     onChange={(e) => setCustQty(e.target.value)}
                     className="w-full px-3.5 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 bg-white"

@@ -173,7 +173,7 @@ export default function UpcomingEvents() {
                 {/* Conditional Download Option matching PHP implementation if it's a PDF target */}
                 {event.poster && event.poster.toLowerCase().endsWith('.pdf') && (
                   <a 
-                    href={event.poster.startsWith('http') ? event.poster : `http://localhost:5000${event.poster}`}
+                    href={`${event.poster}`}
                     download
                     className="border-2 border-purple-700 text-purple-700 font-semibold py-4 px-8 rounded-xl text-center transition-all duration-300 hover:bg-purple-700 hover:text-white flex-1 flex items-center justify-center gap-2 shadow-sm hover:scale-105"
                   >
@@ -190,7 +190,7 @@ export default function UpcomingEvents() {
               
               <div className="relative rounded-[32px] bg-gradient-to-br from-purple-600 to-indigo-600 p-1.5 shadow-2xl transition duration-500 hover:scale-[1.02]">
                 <img
-                  src={event.poster?.startsWith('http') ? event.poster : `http://localhost:5000${event.poster}`}
+                  src={`${event.poster}`}
                   alt={event.topic}
                   className="rounded-[26px] w-full h-auto object-cover max-h-[500px]"
                   onError={(e) => { e.target.src = "https://via.placeholder.com/600x600?text=No+Event+Media" }}
