@@ -32,7 +32,7 @@ export default function CompletedEvents({ events = [] }) {
                   {/* Event Poster Area */}
                   <div className="relative overflow-hidden aspect-[4/5] bg-gray-100">
                     <img
-                      src={event.poster?.startsWith('http') ? event.poster : `http://localhost:5000${event.poster}`}
+                      src={`${event.poster}`}
                       alt={event.eventTitle || "Completed Event"}
                       className="w-full h-full object-cover hover:scale-101 transition duration-300"
                       onError={(e) => { e.target.src = "https://placehold.co/300x450/EEE/31343C?text=No+Poster" }}
