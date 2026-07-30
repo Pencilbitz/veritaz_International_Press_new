@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "veritaz-bbaf5"
+  },
+  "targets": {
+    "veritaz-bbaf5": {
+      "hosting": {
+        "admin": [
+          "veritaz-admin"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

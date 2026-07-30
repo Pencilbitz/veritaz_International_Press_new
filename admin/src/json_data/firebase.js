@@ -1,9 +1,8 @@
-// src/json_data/firebase.js
-
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
+import { getAuth } from "firebase/auth"; // <-- Add this
 
 const firebaseConfig = {
   apiKey: "AIzaSyD_FrYxMZO2ICN0aAswNxKXthmZO_yQd6c",
@@ -20,10 +19,13 @@ const app = initializeApp(firebaseConfig);
 // Firestore
 export const db = getFirestore(app);
 
-// Storage (optional)
+// Storage
 export const storage = getStorage(app);
 
-// Analytics (only works in browser)
+// Authentication
+export const auth = getAuth(app); // <-- Add this
+
+// Analytics
 export const analytics =
   typeof window !== "undefined" ? getAnalytics(app) : null;
 
