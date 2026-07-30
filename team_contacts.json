@@ -1,0 +1,15 @@
+[
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"veritaznew"},
+{"type":"table","name":"team_contacts","database":"veritaznew","data":
+[
+{"id":"1","name":"Dr. K. Baskar","designation":"Chief Operations Officer","phone":"+91 9344810452","email":"","photo":"assets\/image\/Team\/Baskar-Sri.jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"2","name":"Logeshwari Rajan","designation":"Assistant Senior Manager","phone":"+91 6380658876","email":"logeshwari.veritaz@gmail.com","photo":"assets\/image\/Team\/Logeshwari.jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"3","name":"Shahin","designation":"BD Manager - Patent","phone":"+91 9003025706","email":"patent.bbinternational@gmail.com","photo":"assets\/image\/Team\/Shahin.jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"4","name":"Dharani Priya S","designation":"BD Associate - Textbook","phone":"+91 8925812274","email":"dharanipriyaa.veritaz@gmail.com","photo":"assets\/image\/Team\/Dharani Priya .jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"5","name":"Arikaran VG","designation":"BD Associate - Textbook","phone":"+91 8925812272","email":"arikaran.veritaz@gmail.com","photo":"assets\/image\/Team\/Arikaran VG.jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"6","name":"Deepika P","designation":"BD Associate - Event","phone":"+91 8925812276","email":"deepika.veritaz@gmail.com","photo":"assets\/image\/Team\/Deepika.jpeg","created_at":"2026-07-13 17:53:22"},
+{"id":"7","name":"Manigandan B","designation":"BD Associate - Event","phone":"+91 8925812271","email":"manigandan.veritaz@gmail.com","photo":"assets\/image\/Team\/Manigandan-new.jpeg","created_at":"2026-07-13 17:53:22"}
+]
+}
+]

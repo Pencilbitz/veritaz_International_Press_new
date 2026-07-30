@@ -15,6 +15,8 @@ import {
   Users,
   GraduationCap
 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function UpcomingEvents() {
   const { eventId } = useParams();
@@ -22,16 +24,48 @@ export default function UpcomingEvents() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/events/${eventId}`)
-      .then(res => res.json())
-      .then(data => {
-        setEvent(data);
-        setLoading(false);
-      })
-      .catch(err => {
+    const fetchEvent = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "events (2)"));
+
+        console.log("Snapshot:", snapshot);
+        console.log("Number of documents:", snapshot.size);
+
+        let events = [];
+
+        snapshot.forEach((doc) => {
+          console.log("Document ID:", doc.id);
+          console.log("Document Data:", doc.data());
+
+          const docData = doc.data();
+
+          if (Array.isArray(docData.data)) {
+            console.log("Found data array:", docData.data);
+
+            events = [...events, ...docData.data];
+          } else {
+            console.log("No 'data' array in this document");
+          }
+        });
+
+        console.log("All Events:", events);
+        console.log("Current eventId:", eventId);
+
+        const selectedEvent = events.find(
+          (event) => String(event.id) === String(eventId)
+        );
+
+        console.log("Selected Event:", selectedEvent);
+
+        setEvent(selectedEvent || null);
+      } catch (err) {
         console.error("Error fetching event:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchEvent();
   }, [eventId]);
 
   if (loading) {
@@ -63,17 +97,17 @@ export default function UpcomingEvents() {
 
         <div className="relative max-w-7xl mx-auto px-6 lg:px-10">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
-            
+
             {/* LEFT DETAILS COLUMN */}
             <div className="order-2 lg:order-1">
-              <Link 
-                to="/events" 
+              <Link
+                to="/events"
                 className="inline-flex items-center gap-2 text-violet-600 hover:text-violet-800 font-semibold mb-6 transition"
               >
                 <ArrowLeft size={20} /> Back to Events
               </Link>
               <br />
-              
+
               <div className="mb-2">
                 <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-5 py-1.5 text-xs font-bold uppercase tracking-wider mb-2">
                   College
@@ -172,7 +206,7 @@ export default function UpcomingEvents() {
 
                 {/* Conditional Download Option matching PHP implementation if it's a PDF target */}
                 {event.poster && event.poster.toLowerCase().endsWith('.pdf') && (
-                  <a 
+                  <a
                     href={`${event.poster}`}
                     download
                     className="border-2 border-purple-700 text-purple-700 font-semibold py-4 px-8 rounded-xl text-center transition-all duration-300 hover:bg-purple-700 hover:text-white flex-1 flex items-center justify-center gap-2 shadow-sm hover:scale-105"
@@ -187,7 +221,7 @@ export default function UpcomingEvents() {
             <div className="relative order-1 lg:order-2">
               <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-violet-300 blur-3xl opacity-40"></div>
               <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-blue-300 blur-3xl opacity-40"></div>
-              
+
               <div className="relative rounded-[32px] bg-gradient-to-br from-purple-600 to-indigo-600 p-1.5 shadow-2xl transition duration-500 hover:scale-[1.02]">
                 <img
                   src={`${event.poster}`}

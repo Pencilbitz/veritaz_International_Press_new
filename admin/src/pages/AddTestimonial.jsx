@@ -6,8 +6,25 @@ import Swal from 'sweetalert2';
 import { MdStar, MdArrowBack, MdSend, MdPerson, MdPlayCircleOutline } from 'react-icons/md';
 import axios from 'axios';
 import UploadBox from '../components/UploadBox';
+import {
+  doc,
+  getDocs,
+  setDoc,
+  collection,
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
+import { uploadImage } from "../json_data/cloudinary";
 
 const MAX_CHARS = 1000;
+
+// New testimonials are added into this document's `data` array.
+const NEW_TESTIMONIAL_DOC_ID = "hC8wovLkX6ryzHzNN5th";
+
+const formatTimestamp = (date) => {
+  const pad = (n) => n.toString().padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
 
 const AddTestimonial = () => {
   const navigate = useNavigate();
@@ -16,7 +33,7 @@ const AddTestimonial = () => {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [charCount, setCharCount] = useState(0);
-  
+
   // 🌟 Updated preview state keys to match new schema
   const [previewData, setPreviewData] = useState({
     name: '',
@@ -39,72 +56,162 @@ const AddTestimonial = () => {
   const watchIsVideo = watch('is_video_testimonial');
 
   useEffect(() => {
-    if (isEdit) {
-      const fetchTestimonial = async () => {
-        try {
-          const res = await axios.get(`http://localhost:5000/api/testimonials/${id}`);
-          const t = res.data;
-          reset(t);
-          setRating(t.rating);
-          setPhotoPreview(t.avatar_url); // 🌟 Maps to avatar_url
-          setPreviewData(t);
-          setCharCount(t.content?.length || 0); // 🌟 Maps to content length
-        } catch (error) {
-          console.error("Error fetching testimonial", error);
+    if (!isEdit) return;
+
+    const fetchTestimonial = async () => {
+      try {
+        // Testimonials are stored as `data` arrays spread across several
+        // documents in the "testimonials" collection, so we search all of
+        // them for the entry whose own `id` field matches the URL param.
+        const snapshot = await getDocs(collection(db, "testimonials"));
+
+        let testimonial = null;
+
+        snapshot.forEach((d) => {
+          const raw = d.data();
+          if (Array.isArray(raw.data)) {
+            const match = raw.data.find((t) => String(t.id) === String(id));
+            if (match) testimonial = match;
+          }
+        });
+
+        if (!testimonial) {
+          Swal.fire("Error", "Testimonial not found", "error");
+          return;
         }
-      };
-      fetchTestimonial();
-    }
-  }, [id, reset]);
+
+        reset({
+          name: testimonial.name || "",
+          designation: testimonial.designation || "",
+          content: testimonial.content || "",
+          is_video_testimonial:
+            testimonial.is_video_testimonial === true ||
+            testimonial.is_video_testimonial === "1",
+          video_url: testimonial.video_url || "",
+        });
+
+        setRating(Number(testimonial.rating) || 0);
+        setPhotoPreview(testimonial.avatar_url || null);
+        setPreviewData(testimonial);
+        setCharCount(testimonial.content?.length || 0);
+      } catch (error) {
+        console.error(error);
+        Swal.fire("Error", "Failed to load testimonial", "error");
+      }
+    };
+
+    fetchTestimonial();
+  }, [id, isEdit, reset]);
 
   const updatePreview = (field, value) => {
     setPreviewData((prev) => ({ ...prev, [field]: value }));
   };
 
+
+
   const onSubmit = async (data) => {
     if (!rating) {
-      Swal.fire({ title: 'Rating Required', text: 'Please select a star rating.', icon: 'warning', confirmButtonColor: '#2563EB' });
+      Swal.fire({
+        title: "Rating Required",
+        text: "Please select a star rating.",
+        icon: "warning",
+      });
       return;
     }
+
     try {
-      let avatarUrl = photoPreview || 'https://via.placeholder.com/150';
+      let avatarUrl = photoPreview || "";
+
       if (photoFile) {
-        const formData = new FormData();
-        formData.append('image', photoFile);
-        const uploadRes = await axios.post('http://localhost:5000/api/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        avatarUrl = `http://localhost:5000${uploadRes.data.url}`;
+        avatarUrl = await uploadImage(photoFile);
       }
 
-      // 🌟 Structured cleanly payload fields to strictly align with target database columns
-      const newTestimonial = {
+      const testimonialData = {
         name: data.name,
         designation: data.designation,
-        rating: rating,
+        rating: Number(rating),
         content: data.content,
         avatar_url: avatarUrl,
-        is_video_testimonial: Boolean(data.is_video_testimonial),
-        video_url: data.is_video_testimonial ? data.video_url : null
+        is_video_testimonial: data.is_video_testimonial,
+        video_url: data.is_video_testimonial
+          ? data.video_url
+          : "",
       };
 
+      // Every testimonial doc's `data` array lives across the collection,
+      // so read all of it up front — needed both to locate the entry being
+      // edited and to compute a fresh unique id for a new one.
+      const snapshot = await getDocs(collection(db, "testimonials"));
+
+      let targetDocId = null;
+      let targetArray = [];
+      let maxId = 0;
+      let found = false;
+
+      snapshot.forEach((d) => {
+        const raw = d.data();
+        if (!Array.isArray(raw.data)) return;
+
+        raw.data.forEach((t) => {
+          const numericId = Number(t.id);
+          if (!Number.isNaN(numericId) && numericId > maxId) {
+            maxId = numericId;
+          }
+        });
+
+        if (isEdit) {
+          const index = raw.data.findIndex((t) => String(t.id) === String(id));
+          if (index !== -1) {
+            found = true;
+            targetDocId = d.id;
+            targetArray = [...raw.data];
+            targetArray[index] = { ...targetArray[index], ...testimonialData, id };
+          }
+        }
+
+        if (!isEdit && d.id === NEW_TESTIMONIAL_DOC_ID) {
+          targetDocId = d.id;
+          targetArray = [...raw.data];
+        }
+      });
+
       if (isEdit) {
-        await axios.put(`http://localhost:5000/api/testimonials/${id}`, newTestimonial);
+        if (!found) {
+          throw new Error("Testimonial not found for editing.");
+        }
       } else {
-        await axios.post('http://localhost:5000/api/testimonials', newTestimonial);
+        // Add: push a new entry with a fresh unique id into the designated doc
+        testimonialData.id = String(maxId + 1);
+        testimonialData.created_at = formatTimestamp(new Date());
+        targetDocId = NEW_TESTIMONIAL_DOC_ID;
+        targetArray.push(testimonialData);
       }
 
-      await Swal.fire({
-        title: isEdit ? '🌟 Testimonial Updated!' : '🌟 Testimonial Added!',
-        text: `Testimonial from ${data.name} has been ${isEdit ? 'updated' : 'submitted'} successfully.`,
-        icon: 'success',
-        confirmButtonColor: '#2563EB',
-        confirmButtonText: 'View Testimonials',
+      await setDoc(
+        doc(db, "testimonials", targetDocId),
+        { data: targetArray },
+        { merge: true }
+      );
+
+      Swal.fire({
+        title: "Success!",
+        text: isEdit
+          ? "Testimonial updated successfully."
+          : "Testimonial added successfully.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
       });
-      navigate('/admin/testimonials');
+
+      navigate("/admin/testimonials");
     } catch (error) {
-      console.error('Error saving testimonial:', error);
-      Swal.fire('Error', 'Failed to save testimonial.', 'error');
+      console.error(error);
+
+      Swal.fire(
+        "Error",
+        "Failed to save testimonial.",
+        "error"
+      );
     }
   };
 
@@ -146,9 +253,8 @@ const AddTestimonial = () => {
                     className="focus:outline-none"
                   >
                     <MdStar
-                      className={`text-3xl transition-all duration-150 ${
-                        star <= (hoverRating || rating) ? 'star-active' : 'star-inactive'
-                      }`}
+                      className={`text-3xl transition-all duration-150 ${star <= (hoverRating || rating) ? 'star-active' : 'star-inactive'
+                        }`}
                     />
                   </motion.button>
                 ))}
@@ -287,7 +393,7 @@ const AddTestimonial = () => {
                     <MdPerson className="text-blue-500 text-2xl" />
                   </div>
                 )}
-                
+
                 {/* Overlaid video icon element to render if checked */}
                 {previewData.is_video_testimonial && (
                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center">

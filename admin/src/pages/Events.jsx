@@ -3,6 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { MdEvent, MdAdd, MdEdit, MdDelete, MdSearch, MdCloudUpload } from 'react-icons/md';
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  writeBatch,
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
 
 const Events = () => {
   const navigate = useNavigate();
@@ -13,10 +23,21 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/events');
-      setEvents(res.data || []);
+      const snapshot = await getDocs(collection(db, "events (2)"));
+
+      let eventsData = [];
+
+      snapshot.forEach((doc) => {
+        const docData = doc.data();
+
+        if (Array.isArray(docData.data)) {
+          eventsData.push(...docData.data);
+        }
+      });
+
+      setEvents(eventsData);
     } catch (err) {
-      console.error('Error fetching events', err);
+      console.error("Error fetching events:", err);
     }
   };
 
@@ -26,23 +47,51 @@ const Events = () => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: 'Delete Event?',
-      text: 'This action cannot be undone.',
-      icon: 'warning',
+      title: "Delete Event?",
+      text: "This action cannot be undone.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#2563EB',
-      confirmButtonText: 'Yes, Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#2563EB",
+      confirmButtonText: "Yes, Delete",
     });
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`http://localhost:5000/api/events/${id}`);
-        setEvents(events.filter(e => e.id !== id));
-        Swal.fire({ title: 'Deleted!', text: 'Event has been removed.', icon: 'success', timer: 1500, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete event', 'error');
-      }
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "events (2)"));
+
+      let firestoreDocId = "";
+      let eventsArray = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+
+        if (Array.isArray(data.data)) {
+          firestoreDocId = d.id;
+          eventsArray = data.data;
+        }
+      });
+
+      const updatedEvents = eventsArray.filter(
+        (event) => String(event.id) !== String(id)
+      );
+
+      await updateDoc(doc(db, "events (2)", firestoreDocId), {
+        data: updatedEvents,
+      });
+
+      setEvents(updatedEvents);
+
+      Swal.fire({
+        title: "Deleted!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Failed to delete event", "error");
     }
   };
 
@@ -70,25 +119,54 @@ const Events = () => {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
+
     const result = await Swal.fire({
       title: `Delete ${selectedIds.length} Events?`,
-      text: 'This action cannot be undone.',
-      icon: 'warning',
+      text: "This action cannot be undone.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#2563EB',
-      confirmButtonText: 'Yes, Delete All',
-      cancelButtonText: 'Cancel',
+      confirmButtonColor: "#EF4444",
+      cancelButtonColor: "#2563EB",
+      confirmButtonText: "Yes, Delete",
     });
-    if (result.isConfirmed) {
-      try {
-        await axios.post('http://localhost:5000/api/events/bulk-delete', { ids: selectedIds });
-        setEvents(events.filter(e => !selectedIds.includes(e.id)));
-        setSelectedIds([]);
-        Swal.fire({ title: 'Deleted!', text: 'Selected events have been removed.', icon: 'success', timer: 1500, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete events', 'error');
-      }
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "events (2)"));
+
+      let firestoreDocId = "";
+      let eventsArray = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+
+        if (Array.isArray(data.data)) {
+          firestoreDocId = d.id;
+          eventsArray = data.data;
+        }
+      });
+
+      const updatedEvents = eventsArray.filter(
+        (event) => !selectedIds.includes(event.id)
+      );
+
+      await updateDoc(doc(db, "events (2)", firestoreDocId), {
+        data: updatedEvents,
+      });
+
+      setEvents(updatedEvents);
+      setSelectedIds([]);
+
+      Swal.fire({
+        title: "Deleted!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Failed to delete events", "error");
     }
   };
 
@@ -155,8 +233,8 @@ const Events = () => {
             <thead className="bg-blue-50 border-b border-blue-100">
               <tr>
                 <th className="table-th text-blue-700 w-12 text-center">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
                     checked={filtered.length > 0 && selectedIds.length === filtered.length}
                     onChange={handleSelectAll}
@@ -178,7 +256,7 @@ const Events = () => {
                 filtered.map((evt) => (
                   <tr key={evt.id} className="table-tr">
                     <td className="table-td text-center">
-                      <input 
+                      <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
                         checked={selectedIds.includes(evt.id)}
@@ -186,8 +264,9 @@ const Events = () => {
                       />
                     </td>
                     <td className="table-td">
+                      {console.log(evt.poster)}
                       {evt.poster
-                        ? <img src={`${evt.poster}`} className="w-10 h-12 object-cover rounded-lg shadow-sm" alt={evt.eventTitle} onError={(e) => e.target.src = "https://placehold.co/150x150/EEE/31343C"} />
+                        ? <img src={evt.poster} className="w-10 h-12 object-cover rounded-lg shadow-sm" alt={evt.eventTitle} onError={(e) => e.target.src = "https://placehold.co/150x150/EEE/31343C"} />
                         : <div className="w-10 h-12 rounded-lg bg-blue-50 flex items-center justify-center"><MdEvent className="text-blue-400" /></div>
                       }
                     </td>

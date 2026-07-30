@@ -1,22 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function Contacts() {
   // Form submission state
   const [formStatus, setFormStatus] = useState({ message: '', type: '' });
   const [teamMembers, setTeamMembers] = useState([]);
 
-  // Fetch Team
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/team');
-        if (!res.ok) throw new Error('Network response was not ok');
-        const data = await res.json();
-        setTeamMembers(data);
-      } catch (error) {
-        console.error('Error fetching team members:', error);
+        const snapshot = await getDocs(collection(db, "team_contacts"));
+
+        let members = [];
+
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+
+          // If the document contains an array called "data"
+          if (Array.isArray(data.data)) {
+            members = [...members, ...data.data];
+          }
+        });
+
+        console.log(members);
+        setTeamMembers(members);
+      } catch (err) {
+        console.error("Error fetching contacts:", err);
       }
     };
+
     fetchTeam();
   }, []);
 
@@ -61,7 +74,7 @@ export default function Contacts() {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
-    
+
     setFormStatus({ message: 'Processing...', type: 'loading' });
 
     const formData = new FormData(form);
@@ -82,23 +95,23 @@ export default function Contacts() {
         body: JSON.stringify(payload)
       });
       const data = await response.json();
-      
+
       if (response.ok) {
-        setFormStatus({ 
-          message: "✅ Success! We'll be in touch within 24 hours.", 
-          type: 'success' 
+        setFormStatus({
+          message: "✅ Success! We'll be in touch within 24 hours.",
+          type: 'success'
         });
         form.reset();
       } else {
-        setFormStatus({ 
-          message: "❌ " + (data.message || "Submission failed."), 
-          type: 'error' 
+        setFormStatus({
+          message: "❌ " + (data.message || "Submission failed."),
+          type: 'error'
         });
       }
     } catch (error) {
-      setFormStatus({ 
-        message: "❌ Connection error. Please try again.", 
-        type: 'error' 
+      setFormStatus({
+        message: "❌ Connection error. Please try again.",
+        type: 'error'
       });
     }
   };
@@ -119,7 +132,7 @@ export default function Contacts() {
             if (!coo) return null;
             return (
               <div className="relative group overflow-hidden bg-white w-[350px] h-[500px] shadow-lg rounded-lg flex items-center justify-center">
-                <img 
+                <img
                   src={coo.photo ? (coo.photo.startsWith('http') ? coo.photo : `${coo.photo}`) : 'https://placehold.co/400x500/EEE/31343C?text=Photo'}
                   alt={coo.name}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -152,10 +165,10 @@ export default function Contacts() {
             return (
               <div className="bg-white rounded-tl-[60px] rounded-br-[60px] overflow-hidden shadow-lg border border-slate-100 flex flex-col h-full hover:shadow-2xl transition-all duration-300">
                 <div className="h-72 overflow-hidden relative group shrink-0">
-                  <img 
+                  <img
                     src={asst.photo ? (asst.photo.startsWith('http') ? asst.photo : `${asst.photo}`) : 'https://placehold.co/400x400/EEE/31343C?text=Photo'}
-                    alt={asst.name} 
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                    alt={asst.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#3e7d89]/20 to-transparent pointer-events-none"></div>
                 </div>
@@ -203,7 +216,7 @@ export default function Contacts() {
               .map((member) => (
                 <div key={member.id} className="bg-white rounded-tl-[60px] rounded-br-[60px] overflow-hidden shadow-lg border border-slate-100 flex flex-col h-full hover:shadow-2xl transition-all duration-300">
                   <div className="h-72 overflow-hidden relative group shrink-0">
-                    <img 
+                    <img
                       src={member.photo ? (member.photo.startsWith('http') ? member.photo : `${member.photo}`) : 'https://placehold.co/400x400/EEE/31343C?text=Photo'}
                       alt={member.name}
                       className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -393,10 +406,9 @@ export default function Contacts() {
 
                 {/* Dynamically Styled Response Message container */}
                 {formStatus.message && (
-                  <p className={`text-center text-sm font-bold mt-4 p-3 rounded-xl ${
-                    formStatus.type === 'success' ? 'text-green-600 bg-green-50' : 
-                    formStatus.type === 'loading' ? 'text-blue-600' : 'text-red-600 bg-red-50'
-                  }`}>
+                  <p className={`text-center text-sm font-bold mt-4 p-3 rounded-xl ${formStatus.type === 'success' ? 'text-green-600 bg-green-50' :
+                      formStatus.type === 'loading' ? 'text-blue-600' : 'text-red-600 bg-red-50'
+                    }`}>
                     {formStatus.message}
                   </p>
                 )}

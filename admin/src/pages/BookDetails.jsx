@@ -2,75 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  MdArrowBack, MdSave, MdOutlineMenuBook,
+  MdSave, MdOutlineMenuBook,
   MdPeopleOutline, MdCancel, MdStar
 } from 'react-icons/md';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
 
-const handleUpdate = async (e) => {
-  e.preventDefault();
-  setUpdateLoading(true);
-
-  try {
-    const updatedData = { ...formData };
-
-    console.log("Original Form Data:", formData);
-    console.log("Selected Upload Files:", uploadFiles);
-
-    // Upload Cover 1
-    if (uploadFiles.cover1) {
-      const fd = new FormData();
-      fd.append("image", uploadFiles.cover1);
-
-      const res = await axios.post(
-        "http://localhost:5000/api/upload/books",
-        fd
-      );
-
-      console.log("Cover1 Upload Response:", res.data);
-
-      updatedData.cover1 = res.data.url;
-    }
-
-    // Upload Cover 2
-    if (uploadFiles.cover2) {
-      const fd = new FormData();
-      fd.append("image", uploadFiles.cover2);
-
-      const res = await axios.post(
-        "http://localhost:5000/api/upload/books",
-        fd
-      );
-
-      console.log("Cover2 Upload Response:", res.data);
-
-      updatedData.cover2 = res.data.url;
-    }
-
-    console.log("Final Updated Data:", updatedData);
-
-    const response = await axios.put(
-      `http://localhost:5000/api/books/${id}`,
-      updatedData
-    );
-
-    console.log("Update API Response:", response.data);
-
-    alert("Book updated successfully!");
-    navigate("/admin/books");
-
-  } catch (err) {
-    console.error("Update Error:", err);
-
-    if (err.response) {
-      console.log("Status:", err.response.status);
-      console.log("Response:", err.response.data);
-    }
-
-    alert(err.response?.data?.message || "Update failed");
-  } finally {
-    setUpdateLoading(false);
-  }
-};
+import { db } from "../json_data/firebase";
+import { uploadImage } from "../json_data/cloudinary";
 
 const BookDetails = () => {
   const { id } = useParams();
@@ -79,7 +22,7 @@ const BookDetails = () => {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // State configured exactly to your specific table columns
+  // State configured to specific table columns
   const [formData, setFormData] = useState({
     title: "",
     authors: "",
@@ -101,46 +44,66 @@ const BookDetails = () => {
     cover2: ""
   });
 
-  // 🌟 FIX 1: Declared missing states for previewing and capturing binary files
   const [previews, setPreviews] = useState({ cover1: null, cover2: null });
   const [uploadFiles, setUploadFiles] = useState({ cover1: null, cover2: null });
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/books/${id}`);
-        setFormData({
-          title: res.data.title || "",
-          authors: res.data.authors || "",
-          isbn: res.data.isbn || "",
-          edition: res.data.edition || "",
-          ratings: res.data.ratings ?? 5,
-          about: res.data.about || "",
-          flipkart: res.data.flipkart || "",
-          price: res.data.price || "",
-          status: res.data.status || "In Stock",
-          weight: res.data.weight || "",
-          binding: res.data.binding || "",
-          dimensions: res.data.dimensions || "",
-          language: res.data.language || "",
-          format: res.data.format || "",
-          pages: res.data.pages || "",
-          copyright: res.data.copyright || "",
-          cover1: res.data.cover1 || "",
-          cover2: res.data.cover2 || ""
+        const snapshot = await getDocs(collection(db, "books (5)"));
+
+        let books = [];
+
+        snapshot.forEach((d) => {
+          const data = d.data();
+          if (Array.isArray(data.data)) {
+            books = data.data;
+          }
         });
 
-        // Populate initial image previews from server paths
-        setPreviews({
-          cover1: res.data.cover1 ? `http://localhost:5000/${res.data.cover1}` : null,
-          cover2: res.data.cover2 ? `http://localhost:5000/${res.data.cover2}` : null
+        const book = books.find(
+          (b) => String(b.id) === String(id)
+        );
+
+        if (!book) {
+          setError("Book not found");
+          return;
+        }
+
+        setFormData({
+          title: book.title || "",
+          authors: book.authors || "",
+          isbn: book.isbn || "",
+          edition: book.edition || "",
+          ratings: book.ratings || 5,
+          about: book.about || "",
+          flipkart: book.flipkart || "",
+          price: book.price || "",
+          status: book.status || "In Stock",
+          weight: book.weight || "",
+          binding: book.binding || "",
+          dimensions: book.dimensions || "",
+          language: book.language || "",
+          format: book.format || "",
+          pages: book.pages || "",
+          copyright: book.copyright || "",
+          cover1: book.cover1 || "",
+          cover2: book.cover2 || ""
         });
+
+        setPreviews({
+          cover1: book.cover1?.trim() ? book.cover1 : null,
+          cover2: book.cover2?.trim() ? book.cover2 : null,
+        });
+
       } catch (err) {
-        setError("Failed to fetch book data");
+        console.error("Fetch error:", err);
+        setError("Failed to fetch book");
       } finally {
         setLoading(false);
       }
     };
+
     fetchBook();
   }, [id]);
 
@@ -154,56 +117,79 @@ const BookDetails = () => {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    const selectedFile = files[0];
-    if (!selectedFile) return;
+    const file = files[0];
 
-    // Track the absolute physical file for submission
-    setUploadFiles(prev => ({ ...prev, [name]: selectedFile }));
+    if (!file) return;
 
-    // Track the local asset address for immediate presentation updates
-    setPreviews(prev => ({ ...prev, [name]: URL.createObjectURL(selectedFile) }));
-  }; // 🌟 FIX 2: Correctly closed handleFileChange block here
+    setUploadFiles((prev) => ({
+      ...prev,
+      [name]: file,
+    }));
 
-  // 🌟 FIX 3: Moved handleUpdate out and configured it to use FormData for multi-part file support
+    setPreviews((prev) => ({
+      ...prev,
+      [name]: URL.createObjectURL(file),
+    }));
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setUpdateLoading(true);
 
     try {
-      const dataToSend = new FormData();
+      const updatedData = { ...formData };
 
-      // 1. Append textual fields and format numbers to match schema types
-      Object.keys(formData).forEach((key) => {
-        if (key !== "cover1" && key !== "cover2") {
-          if (key === "ratings") {
-            dataToSend.append(key, Number(formData.ratings) || 5);
-          } else if (key === "price") {
-            dataToSend.append(key, formData.price ? Number(formData.price) : "");
-          } else if (key === "pages") {
-            dataToSend.append(key, formData.pages ? Number(formData.pages) : "");
-          } else {
-            dataToSend.append(key, formData[key]);
-          }
+      // Upload Cover 1 to Cloudinary
+      if (uploadFiles.cover1) {
+        updatedData.cover1 = await uploadImage(uploadFiles.cover1);
+      }
+
+      // Upload Cover 2 to Cloudinary
+      if (uploadFiles.cover2) {
+        updatedData.cover2 = await uploadImage(uploadFiles.cover2);
+      }
+
+      const snapshot = await getDocs(collection(db, "books (5)"));
+
+      let tableDocId = "";
+      let books = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+        if (Array.isArray(data.data)) {
+          tableDocId = d.id;
+          books = data.data;
         }
       });
 
-      // 2. Append new binary file layers if modifications exist
-      if (uploadFiles.cover1) {
-        dataToSend.append("cover1", uploadFiles.cover1);
-      }
-      if (uploadFiles.cover2) {
-        dataToSend.append("cover2", uploadFiles.cover2);
+      const index = books.findIndex(
+        (b) => String(b.id) === String(id)
+      );
+
+      if (index === -1) {
+        throw new Error("Book not found in database array");
       }
 
-      // 3. Dispatch multipart submission
-      await axios.put(`http://localhost:5000/api/books/${id}`, dataToSend, {
-        headers: { "Content-Type": "multipart/form-data" }
+      const updatedBook = {
+        ...books[index],
+        ...updatedData,
+        ratings: Number(updatedData.ratings) || 5,
+        price: Number(updatedData.price) || 0,
+        pages: Number(updatedData.pages) || 0,
+      };
+
+      books[index] = updatedBook;
+
+      await updateDoc(doc(db, "books (5)", tableDocId), {
+        data: books
       });
 
-      alert('Book details and covers updated successfully!');
-      navigate('/admin/books');
+      alert("Book updated successfully!");
+      navigate("/admin/books");
+
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to update book database record.');
+      console.error("Update Error:", err);
+      alert(err.response?.data?.message || err.message || "Failed to update book.");
     } finally {
       setUpdateLoading(false);
     }
@@ -211,7 +197,6 @@ const BookDetails = () => {
 
   if (loading) return <div className="p-8 text-center text-brand-gray">Reading Book Data...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
-
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
@@ -225,7 +210,7 @@ const BookDetails = () => {
       <form onSubmit={handleUpdate}>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-          {/* Left Column - Media asset URLs matching cover1 & cover2 columns */}
+          {/* Left Column - Media asset URLs */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="bg-[#f0f4f8] rounded-2xl p-6 flex flex-col shadow-sm">
               <h3 className="text-sm font-bold text-gray-700 uppercase mb-4 pb-2 border-b">Book Covers</h3>
@@ -234,9 +219,13 @@ const BookDetails = () => {
               <div className="grid grid-cols-3 items-center border-b border-gray-100 pb-2">
                 <div className="col-span-1 text-xs font-bold text-brand-gray">Cover Image 1</div>
                 <div className="col-span-2 space-y-2">
-                  {previews.cover1 && (
-                    <img src={previews.cover1} alt="Cover 1 Preview" className="w-16 h-20 object-cover rounded border shadow-sm" />
-                  )}
+                  {previews.cover1 ? (
+                    <img
+                      src={previews.cover1}
+                      alt="Cover 1 Preview"
+                      className="w-16 h-20 object-cover rounded border shadow-sm"
+                    />
+                  ) : null}
                   <input
                     type="file"
                     name="cover1"
@@ -251,9 +240,13 @@ const BookDetails = () => {
               <div className="grid grid-cols-3 items-center border-b border-gray-100 pb-2">
                 <div className="col-span-1 text-xs font-bold text-brand-gray">Cover Image 2</div>
                 <div className="col-span-2 space-y-2">
-                  {previews.cover2 && (
-                    <img src={previews.cover2} alt="Cover 2 Preview" className="w-16 h-20 object-cover rounded border shadow-sm" />
-                  )}
+                  {previews.cover2 ? (
+                    <img
+                      src={previews.cover2}
+                      alt="Cover 2 Preview"
+                      className="w-16 h-20 object-cover rounded border shadow-sm"
+                    />
+                  ) : null}
                   <input
                     type="file"
                     name="cover2"
@@ -266,7 +259,7 @@ const BookDetails = () => {
             </div>
           </div>
 
-          {/* Right Column - Core Database Information Fields */}
+          {/* Right Column - Core Fields */}
           <div className="lg:col-span-8 flex flex-col gap-5">
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
 
@@ -299,7 +292,7 @@ const BookDetails = () => {
                   <label className="block text-xs font-bold text-gray-600 uppercase mb-1 flex items-center gap-1">
                     <MdStar className="text-yellow-500" /> Default Ratings (1-5)
                   </label>
-                  <input type="decimal" min="1" max="5" name="ratings" value={formData.ratings} onChange={handleChange} className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" />
+                  <input type="number" min="1" max="5" step="0.1" name="ratings" value={formData.ratings} onChange={handleChange} className="w-full text-sm p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" />
                 </div>
               </div>
 
@@ -316,7 +309,7 @@ const BookDetails = () => {
                 </div>
               </div>
 
-              {/* Pricing section matching price field */}
+              {/* Pricing section */}
               <div className="p-4 bg-[#f8fbf9] border border-green-100 rounded-xl mb-4">
                 <label className="block text-xs font-bold text-green-700 uppercase mb-1">Price (₹)</label>
                 <div className="flex items-center gap-1.5">
@@ -337,7 +330,7 @@ const BookDetails = () => {
                   placeholder="Provide book features or summaries description..."
                 />
 
-                <div className="mb-6">
+                <div className="mt-4">
                   <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
                     Flipkart Link
                   </label>
@@ -351,8 +344,6 @@ const BookDetails = () => {
                   />
                 </div>
               </div>
-
-
 
               {/* Submission Controls */}
               <div className="flex gap-4">
@@ -376,7 +367,7 @@ const BookDetails = () => {
           </div>
         </div>
 
-        {/* Technical Product Specifications Table Mapping Remaining Columns */}
+        {/* Technical Product Specifications Table */}
         <div className="mt-6 bg-white rounded-2xl p-6 shadow-sm border border-brand-border">
           <h2 className="text-lg font-bold text-brand-dark mb-4">Product Specifications</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">

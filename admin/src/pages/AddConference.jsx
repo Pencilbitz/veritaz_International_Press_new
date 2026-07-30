@@ -6,6 +6,18 @@ import { MdArrowBack, MdSave, MdAdd, MdRemoveCircle } from 'react-icons/md';
 import UploadBox from '../components/UploadBox';
 import axios from 'axios';
 
+import {
+  collection,
+  addDoc,
+  doc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase"; // your firebase config
+import { uploadImage } from "../json_data/cloudinary";
+
 const AddConference = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,80 +56,95 @@ const AddConference = () => {
   // ═════════════════════════════════════════════════════════════════
   //  FETCH EXISTING DATA (EDIT MODE)
   // ═════════════════════════════════════════════════════════════════
-  // ═════════════════════════════════════════════════════════════════
-  //  FETCH EXISTING DATA (EDIT MODE)
-  // ═════════════════════════════════════════════════════════════════
   useEffect(() => {
     if (isEdit) {
       const fetchConference = async () => {
         try {
-          const res = await axios.get(`http://localhost:5000/api/conferences/${id}`);
-          const rawConf = res.data;
+          const snapshot = await getDocs(collection(db, "conferences (2)"));
 
-          // Helper function to safely parse incoming database JSON columns
-          const safeParse = (field) => {
-            if (!field) return null;
-            if (typeof field === 'object') return field; // Already parsed
-            try {
-              return JSON.parse(field);
-            } catch (e) {
-              console.error("Failed to parse field:", field, e);
-              return null;
+          let conf = null;
+
+          snapshot.forEach((d) => {
+            const raw = d.data();
+            if (Array.isArray(raw.data)) {
+              const match = raw.data.find((c) => String(c.id) === String(id));
+              if (match) conf = match;
             }
-          };
-
-          // Parse all JSON fields securely before distributing to form states
-          const conf = {
-            ...rawConf,
-            dates: safeParse(rawConf.dates),
-            fees: safeParse(rawConf.fees),
-            topics: safeParse(rawConf.topics),
-            speakers: safeParse(rawConf.speakers),
-            organizingcommittee: safeParse(rawConf.organizingcommittee),
-            advisorycommittee: safeParse(rawConf.advisorycommittee),
-            globalexperts: safeParse(rawConf.globalexperts),
-            certificatesdownload: safeParse(rawConf.certificatesdownload),
-            bankdetails: safeParse(rawConf.bankdetails),
-          };
-
-          reset({
-            conferencename: conf.conferencename || '',
-            conferencetitle: conf.conferencetitle || '',
-            isbn: conf.isbn || '',
-            type: conf.type || '',
-            about: conf.about || '',
-            abstractSubmission: conf.dates?.abstractSubmission || '',
-            fullPaperSubmission: conf.dates?.fullPaperSubmission || '',
-            conferenceDate: conf.dates?.conferenceDate || '',
-            conferencestatus: conf.conferencestatus || 'Fully Released',
-            conferencesecurity: conf.conferencesecurity || '',
-            conferencevalidity: conf.conferencevalidity || '',
-            registerlink: conf.registerlink || '',
-            listenerparticipation: conf.listenerparticipation || '',
-            feeAcademicians: conf.fees?.academicians || '',
-            feeStudent: conf.fees?.student || '',
-            feeResearchScholars: conf.fees?.researchScholars || '',
-            feeListener: conf.fees?.listener || ''
           });
 
-          if (conf.topics && Array.isArray(conf.topics) && conf.topics.length) setTopics(conf.topics);
-          if (conf.speakers && Array.isArray(conf.speakers) && conf.speakers.length) setSpeakers(conf.speakers);
-          if (conf.organizingcommittee && Array.isArray(conf.organizingcommittee) && conf.organizingcommittee.length) setOrganizingCommittee(conf.organizingcommittee);
-          if (conf.advisorycommittee && Array.isArray(conf.advisorycommittee) && conf.advisorycommittee.length) setAdvisoryCommittee(conf.advisorycommittee);
-          if (conf.globalexperts && Array.isArray(conf.globalexperts) && conf.globalexperts.length) setGlobalExperts(conf.globalexperts);
-          if (conf.certificatesdownload && Array.isArray(conf.certificatesdownload) && conf.certificatesdownload.length) setCertificatesDownload(conf.certificatesdownload);
-          if (conf.bankdetails) setBankDetails(conf.bankdetails);
+          if (!conf) {
+            Swal.fire("Error", "Conference not found", "error");
+            return;
+          }
+
+          reset({
+            conferencename: conf.conferencename || "",
+            conferencetitle: conf.conferencetitle || "",
+            isbn: conf.isbn || "",
+            type: conf.type || "",
+            about: conf.about || "",
+            abstractSubmission: conf.dates?.abstractSubmission || "",
+            fullPaperSubmission: conf.dates?.fullPaperSubmission || "",
+            conferenceDate: conf.dates?.conferenceDate || "",
+            conferencestatus: conf.conferencestatus || "Fully Released",
+            conferencesecurity: conf.conferencesecurity || "",
+            conferencevalidity: conf.conferencevalidity || "",
+            registerlink: conf.registerlink || "",
+            listenerparticipation: conf.listenerparticipation || "",
+            feeAcademicians: conf.fees?.academicians || "",
+            feeStudent: conf.fees?.student || "",
+            feeResearchScholars: conf.fees?.researchScholars || "",
+            feeListener: conf.fees?.listener || ""
+          });
+
+          setTopics(
+            Array.isArray(conf.topics)
+              ? conf.topics
+              : [""]
+          );
+
+          setSpeakers(
+            Array.isArray(conf.speakers)
+              ? conf.speakers
+              : [{ name: "", designation: "", image: null, imageFile: null }]
+          );
+          setOrganizingCommittee(
+            Array.isArray(conf.organizingcommittee)
+              ? conf.organizingcommittee
+              : [{ role: "", name: "", mobile: "", email: "" }]
+          );
+          setAdvisoryCommittee(
+            Array.isArray(conf.advisorycommittee)
+              ? conf.advisorycommittee
+              : [{ name: "", designation: "", institution: "", location: "", image: null, imageFile: null }]
+          );
+          setGlobalExperts(
+            Array.isArray(conf.globalexperts)
+              ? conf.globalexperts
+              : [{ name: "", designation: "", institution: "", location: "", image: null, imageFile: null }]
+          );
+          setCertificatesDownload(
+            Array.isArray(conf.certificatesdownload)
+              ? conf.certificatesdownload
+              : [{ name: "Track 01", file: null, actualFile: null }]
+          );
+
+          if (conf.bankdetails) {
+            setBankDetails(conf.bankdetails);
+          }
 
           setUploads({
             poster: conf.poster || null,
             proceedingsDownload: conf.proceedingsdownload || null,
-            brochureDownload: conf.brochuredownload || null
+            brochureDownload: conf.brochuredownload || null,
           });
+
         } catch (error) {
-          console.error('Error fetching conference for edit:', error);
-          Swal.fire('Error', 'Failed to fetch conference details', 'error');
+          console.error(error);
+          Swal.fire("Error", "Failed to fetch conference", "error");
         }
       };
+
       fetchConference();
     }
   }, [isEdit, id, reset]);
@@ -158,121 +185,155 @@ const AddConference = () => {
     setUploads(prev => ({ ...prev, [key]: { file, preview } }));
   };
 
-  const uploadFile = async (file) => {
-    if (!file) return null;
-    const formData = new FormData();
-    formData.append('image', file);
-    const res = await axios.post('http://localhost:5000/api/upload/conferences', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+
+  // ═════════════════════════════════════════════════════════════════
+  //  SUBMIT & ERRORS HANDLER
+  // ═════════════════════════════════════════════════════════════════
+  const onError = (formErrors) => {
+    console.warn("⚠️ Form validation failed:", formErrors);
+    Swal.fire({
+      title: "Validation Error",
+      text: "Please fill in all required fields highlighted in red.",
+      icon: "warning"
     });
-    return res.data.url;
   };
 
-  // ═════════════════════════════════════════════════════════════════
-  //  SUBMIT
-  // ═════════════════════════════════════════════════════════════════
   const onSubmit = async (data) => {
-    // 1. Fixed Base Media File Resolution Logic
-    const uploadedFiles = {};
-    for (const key of Object.keys(uploads)) {
-      const item = uploads[key];
-      if (item && item.file) {
-        uploadedFiles[key] = await uploadFile(item.file);
-      } else if (item && item.preview) {
-        uploadedFiles[key] = item.preview;
-      } else if (typeof item === 'string') {
-        uploadedFiles[key] = item;
-      } else {
-        uploadedFiles[key] = null;
+    try {
+      // 1. Fixed Base Media File Resolution Logic
+      const uploadedFiles = {};
+      for (const key of Object.keys(uploads)) {
+        const item = uploads[key];
+        if (item && item.file) {
+          uploadedFiles[key] = await uploadImage(item.file)
+        } else if (item && item.preview) {
+          uploadedFiles[key] = item.preview;
+        } else if (typeof item === 'string') {
+          uploadedFiles[key] = item;
+        } else {
+          uploadedFiles[key] = null;
+        }
       }
-    }
 
-    // 2. Upload array images
-    const processArrayImages = async (arr) => {
-      return Promise.all(arr.map(async (item) => {
-        if (item.imageFile) {
-          const url = await uploadFile(item.imageFile);
-          const cleaned = { ...item, image: url };
-          delete cleaned.imageFile;
+      // 2. Upload array images
+      const processArrayImages = async (arr) => {
+        return Promise.all(arr.map(async (item) => {
+          if (item.imageFile) {
+            const url = await uploadImage(item.imageFile);
+            const cleaned = { ...item, image: url };
+            delete cleaned.imageFile;
+            return cleaned;
+          }
+          return item;
+        }));
+      };
+
+      const finalSpeakers = await processArrayImages(speakers);
+      const finalAdvisoryCommittee = await processArrayImages(advisoryCommittee);
+      const finalGlobalExperts = await processArrayImages(globalExperts);
+
+      // 3. Upload certificate files
+      const finalCertificates = await Promise.all(certificatesDownload.map(async (item) => {
+        if (item.actualFile) {
+          const url = await uploadImage(item.actualFile);
+          const cleaned = { ...item, file: url };
+          delete cleaned.actualFile;
           return cleaned;
         }
         return item;
       }));
-    };
 
-    const finalSpeakers = await processArrayImages(speakers);
-    const finalAdvisoryCommittee = await processArrayImages(advisoryCommittee);
-    const finalGlobalExperts = await processArrayImages(globalExperts);
+      // 4. Build complete structured payload
+      const finalData = {
+        conferencename: data.conferencename || "",
+        conferencetitle: data.conferencetitle || "",
+        isbn: data.isbn || null,
+        type: data.type || null,
+        about: data.about || null,
+        conferencestatus: data.conferencestatus || "Fully Released",
+        conferencesecurity: data.conferencesecurity || null,
+        conferencevalidity: data.conferencevalidity || null,
+        registerlink: data.registerlink || null,
+        listenerparticipation: data.listenerparticipation || null,
+        poster: uploadedFiles.poster || null,
+        brochuredownload: uploadedFiles.brochureDownload || null,
+        proceedingsdownload: uploadedFiles.proceedingsDownload || null,
+        dates: {
+          abstractSubmission: data.abstractSubmission || null,
+          fullPaperSubmission: data.fullPaperSubmission || null,
+          conferenceDate: data.conferenceDate || null
+        },
+        fees: {
+          academicians: data.feeAcademicians || null,
+          student: data.feeStudent || null,
+          researchScholars: data.feeResearchScholars || null,
+          listener: data.feeListener || null
+        },
+        bankdetails: bankDetails.accountName ? bankDetails : null,
+        topics: topics.filter(t => t && t.trim() !== ''),
+        speakers: finalSpeakers.filter(s => s.name).length ? finalSpeakers.filter(s => s.name) : [],
+        organizingcommittee: organizingCommittee.filter(o => o.name).length ? organizingCommittee.filter(o => o.name) : [],
+        advisorycommittee: finalAdvisoryCommittee.filter(a => a.name).length ? finalAdvisoryCommittee.filter(a => a.name) : [],
+        globalexperts: finalGlobalExperts.filter(g => g.name).length ? finalGlobalExperts.filter(g => g.name) : [],
+        certificatesdownload: finalCertificates.filter(c => c.file).length ? finalCertificates.filter(c => c.file) : []
+      };
 
-    // 3. Upload certificate files
-    const finalCertificates = await Promise.all(certificatesDownload.map(async (item) => {
-      if (item.actualFile) {
-        const url = await uploadFile(item.actualFile);
-        const cleaned = { ...item, file: url };
-        delete cleaned.actualFile;
-        return cleaned;
-      }
-      return item;
-    }));
+      // 5. Save to Firestore (Edit existing vs Create new)
+      const snapshot = await getDocs(collection(db, "conferences (2)"));
 
-    // 4. Build complete structured payload matching database exact naming schemas
-    // Build complete structured payload matching database exact naming schemas
-    const finalData = {
-      conferencename: data.conferencename || "", // Safeguard string content against undefined
-      conferencetitle: data.conferencetitle || "",
-      isbn: data.isbn || null,
-      type: data.type || null,
-      about: data.about || null,
-      conferencestatus: data.conferencestatus || "Fully Released",
-      conferencesecurity: data.conferencesecurity || null,
-      conferencevalidity: data.conferencevalidity || null,
-      registerlink: data.registerlink || null,
-      listenerparticipation: data.listenerparticipation || null,
-      poster: uploadedFiles.poster || null,
-      brochuredownload: uploadedFiles.brochureDownload || null,
-      proceedingsdownload: uploadedFiles.proceedingsDownload || null,
-      dates: {
-        abstractSubmission: data.abstractSubmission || null,
-        fullPaperSubmission: data.fullPaperSubmission || null,
-        conferenceDate: data.conferenceDate || null
-      },
-      fees: {
-        academicians: data.feeAcademicians || null,
-        student: data.feeStudent || null,
-        researchScholars: data.feeResearchScholars || null,
-        listener: data.feeListener || null
-      },
-      bankdetails: bankDetails.accountName ? bankDetails : null,
-      topics: topics.filter(t => t && t.trim() !== ''),
-      // Ensure that if no elements exist, it passes an empty array structure instead of breaking validation parameters
-      speakers: finalSpeakers.filter(s => s.name).length ? finalSpeakers.filter(s => s.name) : [],
-      organizingcommittee: organizingCommittee.filter(o => o.name).length ? organizingCommittee.filter(o => o.name) : [],
-      advisorycommittee: finalAdvisoryCommittee.filter(a => a.name).length ? finalAdvisoryCommittee.filter(a => a.name) : [],
-      globalexperts: finalGlobalExperts.filter(g => g.name).length ? finalGlobalExperts.filter(g => g.name) : [],
-      certificatesdownload: finalCertificates.filter(c => c.file).length ? finalCertificates.filter(c => c.file) : []
-    };
+      let tableDocId = null;
+      let updatedArray = [];
 
-    try {
+      snapshot.forEach((d) => {
+        const raw = d.data();
+        if (Array.isArray(raw.data)) {
+          tableDocId = d.id;
+          updatedArray = [...raw.data];
+        }
+      });
+
       if (isEdit) {
-        await axios.put(`http://localhost:5000/api/conferences/${id}`, finalData);
+        // Update only the conference that matches the URL id
+        const index = updatedArray.findIndex((c) => String(c.id) === String(id));
+
+        if (index === -1) {
+          throw new Error("Conference not found for editing.");
+        }
+
+        finalData.id = id;
+        updatedArray[index] = finalData;
       } else {
-        await axios.post('http://localhost:5000/api/conferences', finalData);
+        // Add: give the new conference its own unique id and append it
+        finalData.id =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? crypto.randomUUID()
+            : Date.now().toString();
+        updatedArray.push(finalData);
       }
+
+      if (!tableDocId) {
+        throw new Error("Conference table document not found.");
+      }
+
+      await updateDoc(doc(db, "conferences (2)", tableDocId), {
+        data: updatedArray,
+      });
 
       Swal.fire({
-        title: 'Success!',
-        text: isEdit ? 'Conference updated successfully.' : 'New conference created.',
-        icon: 'success',
+        title: "Success!",
+        text: isEdit ? "Conference updated successfully." : "New conference created.",
+        icon: "success",
         timer: 1500,
         showConfirmButton: false,
       });
-      navigate('/admin/conferences');
+
+      navigate("/admin/conferences");
     } catch (error) {
-      console.error('Error saving conference:', error);
+      console.error("❌ Firestore Save Error:", error);
       Swal.fire({
-        title: 'Error!',
-        text: 'Failed to save conference. Please check server constraints.',
-        icon: 'error',
+        title: "Error!",
+        text: error.message || "Failed to save conference.",
+        icon: "error",
       });
     }
   };
@@ -292,7 +353,7 @@ const AddConference = () => {
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit, onError)} className="space-y-6">
         {/* --- Basic Information --- */}
         <div className="card p-6">
           <h2 className="section-title mb-5">Basic Information</h2>
@@ -727,7 +788,7 @@ const AddConference = () => {
         </div>
 
         <div className="flex justify-end pt-4">
-          <button type="submit" className="btn-primary px-8 py-2.5 text-lg">
+          <button type="submit" className="btn-primary px-8 py-2.5 text-lg flex items-center gap-2">
             <MdSave className="text-xl" /> {isEdit ? 'Save Changes' : 'Publish Conference'}
           </button>
         </div>

@@ -1,38 +1,13 @@
 [
-  {
-    "name": "Dr. Sarah Jenkins",
-    "role": "Professor",
-    "department": "Computer Science",
-    "college": "MIT Institute of Technology",
-    "bookName": "Advanced Computing Trends",
-    "location": "Boston, MA",
-    "rating": 5,
-    "description": "An excellent resource for our faculty. The quality of publications and events organized by Pencilbitz is outstanding.",
-    "photo": "https://randomuser.me/api/portraits/women/44.jpg",
-    "status": "Active"
-  },
-  {
-    "name": "Prof. David Chen",
-    "role": "Head of Department",
-    "department": "Electrical Engineering",
-    "college": "Stanford University",
-    "bookName": "Modern VLSI Design",
-    "location": "Stanford, CA",
-    "rating": 4,
-    "description": "Great conference organization and the book publication process was very smooth and professional.",
-    "photo": "https://randomuser.me/api/portraits/men/32.jpg",
-    "status": "Active"
-  },
-  {
-    "name": "Dr. Emily Robertson",
-    "role": "Assistant Professor",
-    "department": "Mechanical Engineering",
-    "college": "University of Michigan",
-    "bookName": "",
-    "location": "Ann Arbor, MI",
-    "rating": 5,
-    "description": "The Faculty Development Program was highly insightful. I look forward to attending more events in the future.",
-    "photo": "https://randomuser.me/api/portraits/women/68.jpg",
-    "status": "Active"
-  }
+{"type":"header","version":"5.2.1","comment":"Export to JSON plugin for PHPMyAdmin"},
+{"type":"database","name":"veritaznew"},
+{"type":"table","name":"testimonials","database":"veritaznew","data":
+[
+{"id":"1","name":"Dr.A.Sheela","designation":"professor","rating":"5","avatar_url":"https:\/\/image2url.com\/r2\/default\/images\/1774936976076-0d7729f7-867e-4c0b-8b70-eb74128bc04e.png","is_video_testimonial":"0","video_url":null,"content":"This book is very helpful for students. The topics are explained clearly . The presentation is neat and systematic manner.The book is very informative and well written mam.Thank you for Pencil bitz team","created_at":"2026-07-13 17:25:44"},
+{"id":"2","name":"Saurabh Raut","designation":"professor","rating":"5","avatar_url":"https:\/\/image2url.com\/r2\/default\/images\/1774936258877-760cff73-b24b-4170-bebb-1577b588b8a3.png","is_video_testimonial":"0","video_url":null,"content":"I am extremely pleased with the overall publication process and the professional support provided by the team. The editorial guidance was clear, timely, and highly constructive throughout. The quality of printing, formatting, and presentation has exceeded my expectations. Communication was smooth and responsive at every stage of publication. I truly appreciate the dedication and attention given to my work. This experience has been both encouraging and motivating for my future writing. I look forward to collaborating again in the future.","created_at":"2026-07-13 17:25:44"},
+{"id":"3","name":"Dr.Bharani Sethu Pandian","designation":"professor","rating":"5","avatar_url":"https:\/\/image2url.com\/r2\/default\/images\/1774936578125-ba5a0cb5-5c71-43c4-bec5-e74b56c48811.png","is_video_testimonial":"0","video_url":null,"content":"Veritaz International Press is a full-service publishing company offering expert editorial, design, printing, and digital publishing solutions. We serve authors, businesses, and institutions with high-quality, timely, and cost-effective publishing services. Our mission is to empower voices and deliver impactful content across print and digital platforms.","created_at":"2026-07-13 17:25:44"},
+{"id":"4","name":"Dr.Subash","designation":"professor","rating":"5","avatar_url":"https:\/\/image2url.com\/r2\/default\/images\/1774936757158-426fa4c9-0981-43e7-b359-3f901bf4201b.png","is_video_testimonial":"0","video_url":null,"content":"Veritaz International Press is a full-service publishing company offering expert editorial, design, printing, and digital publishing solutions. We serve authors, businesses, and institutions with high-quality, timely, and cost-effective publishing services. Our mission is to empower voices and deliver impactful content across print and digital platforms.","created_at":"2026-07-13 17:25:44"},
+{"id":"5","name":"Dr. Arun .A","designation":"professor","rating":"5","avatar_url":"https:\/\/pub-1407f82391df4ab1951418d04be76914.r2.dev\/uploads\/26a2e57c-82eb-4843-981d-a618ab01b1cc.png","is_video_testimonial":"1","video_url":"assets\/image\/Testmonoials\/Arun.mp4","content":"Working with Veritaz International Press has been a truly collaborative and rewarding experience. I was impressed by the professionalism and efficiency of the publishing team throughout this process. From the initial acquisition to the final layout, their team demonstrated a high level of expertise and dedication. The support staff’s Aswathi & Deva Shree were always responsive and helpful whenever I had queries. It has been a seamless collaboration till the final print.","created_at":"2026-07-13 17:25:44"}
+]
+}
 ]

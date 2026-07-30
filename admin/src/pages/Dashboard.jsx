@@ -15,6 +15,9 @@ import StatsCard from '../components/StatsCard';
 
 import axios from 'axios';
 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
+
 const activityIcons = {
   book: <MdMenuBook className="text-blue-600 text-base" />,
   testimonial: <MdStar className="text-rose-500 text-base" />,
@@ -99,28 +102,48 @@ useEffect(() => {
   fetchDashboardData();
 }, []);
 
+const fetchCollectionData = async (collectionName) => {
+  const snapshot = await getDocs(collection(db, collectionName));
+
+  let data = [];
+
+  snapshot.forEach((doc) => {
+    const docData = doc.data();
+
+    if (Array.isArray(docData.data)) {
+      data.push(...docData.data);
+    }
+  });
+
+  return data;
+};
+
 const fetchDashboardData = async () => {
   try {
     const [
-      booksRes,
-      eventsRes,
-      conferencesRes,
-      testimonialsRes,
+      books,
+      events,
+      conferences,
+      testimonials
     ] = await Promise.all([
-      axios.get(`${API}/books`),
-      axios.get(`${API}/events`),
-      axios.get(`${API}/conferences`),
-      axios.get(`${API}/testimonials`)
+      fetchCollectionData("books (5)"),
+      fetchCollectionData("events (2)"),
+      fetchCollectionData("conferences (2)"),
+      fetchCollectionData("testimonials")
     ]);
 
-    setBooksData(booksRes.data);
-    setEventsData(eventsRes.data);
-    setConferencesData(conferencesRes.data);
-    setTestimonialsData(testimonialsRes.data);
+    console.log("Books:", books);
+    console.log("Events:", events);
+    console.log("Conferences:", conferences);
+    console.log("Testimonials:", testimonials);
 
-    setLoading(false);
+    setBooksData(books);
+    setEventsData(events);
+    setConferencesData(conferences);
+    setTestimonialsData(testimonials);
   } catch (err) {
-    console.error(err);
+    console.error("Dashboard Error:", err);
+  } finally {
     setLoading(false);
   }
 };
@@ -213,7 +236,7 @@ const statsData = [
                     <td className="table-td">
                       <div className="flex items-center gap-3">
                         <img
-                          src={`http://localhost:5000${book.cover1}`}
+                          src={book.cover1}
                           alt={book.title}
                           className="w-8 h-10 rounded-md object-cover shadow-card"
                           onError={(e) => { e.target.src = 'https://via.placeholder.com/32x40?text=B'; }}

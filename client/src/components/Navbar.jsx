@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 import {
   FaLinkedinIn,
@@ -39,17 +41,31 @@ export default function Navbar() {
     };
 
     useEffect(() => {
-        const fetchConferences = async () => {
-            try {
-                const res = await axios.get("http://localhost:5000/api/conferences");
-                // Ensure data array matches array constraints safely
-                setConferences(Array.isArray(res.data) ? res.data : []);
-            } catch (error) {
-                console.error("Failed to fetch conferences", error);
-            }
-        };
-        fetchConferences();
-    }, []);
+  const fetchConferences = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "conferences (2)"));
+
+      let conferences = [];
+
+      snapshot.forEach((doc) => {
+        const docData = doc.data();
+
+        if (Array.isArray(docData.data)) {
+          conferences.push(...docData.data);
+        }
+      });
+
+      console.log("Conferences:", conferences);
+
+      setConferences(conferences);
+    } catch (error) {
+      console.error("Failed to fetch conferences:", error);
+      setConferences([]);
+    }
+  };
+
+  fetchConferences();
+}, []);
 
     useEffect(() => {
         document.body.style.overflow = isMenuOpen ? "hidden" : "";

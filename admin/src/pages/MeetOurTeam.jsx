@@ -2,13 +2,28 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
 import axios from 'axios';
-import { 
+import {
   MdSearch, MdDelete, MdCheckCircle, MdPendingActions, MdPending,
   MdAdd, MdEdit, MdEmail, MdPhone, MdClose, MdPerson
 } from 'react-icons/md';
 import { inquiriesData as initialData } from '../data/dummyData';
 import UploadBox from '../components/UploadBox';
+import {
+  collection,
+  getDocs,
+  getDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+} from "firebase/firestore";
 
+import { db } from "../json_data/firebase";
+import { uploadImage } from "../json_data/cloudinary";
+
+const TEAM_DOC_ID = "uMoNnFpIO6K7JOXOHFfI";
 const MeetOurTeam = () => {
   const [activeTab, setActiveTab] = useState('inquiries');
 
@@ -30,40 +45,66 @@ const MeetOurTeam = () => {
 
   const fetchInquiries = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/inquiries');
-      setInquiries(res.data);
+      const q = query(collection(db, "inquiries"), orderBy("date", "desc"));
+
+      const snapshot = await getDocs(q);
+
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      setInquiries(data);
     } catch (error) {
-      console.error('Error fetching inquiries:', error);
+      console.error(error);
     }
   };
 
   const handleDeleteInquiry = async (id) => {
     const result = await Swal.fire({
-      title: 'Delete Inquiry?',
-      text: 'This action cannot be undone.',
-      icon: 'warning',
+      title: "Delete Inquiry?",
+      text: "This action cannot be undone.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Delete',
+      confirmButtonColor: "#EF4444",
+      confirmButtonText: "Delete",
     });
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`http://localhost:5000/api/inquiries/${id}`);
-        setInquiries((prev) => prev.filter((iq) => iq.id !== id));
-        Swal.fire({ title: 'Deleted!', icon: 'success', timer: 1200, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete inquiry.', 'error');
-      }
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteDoc(doc(db, "inquiries", id));
+
+      setInquiries(prev => prev.filter(item => item.id !== id));
+
+      Swal.fire({
+        title: "Deleted!",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Failed to delete inquiry", "error");
     }
   };
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/inquiries/${id}/status`, { status: newStatus });
-      setInquiries((prev) => prev.map((iq) => (iq.id === id ? { ...iq, status: newStatus } : iq)));
-    } catch (err) {
-      Swal.fire('Error', 'Failed to update status.', 'error');
+      await updateDoc(doc(db, "inquiries", id), {
+        status: newStatus
+      });
+
+      setInquiries(prev =>
+        prev.map(item =>
+          item.id === id
+            ? { ...item, status: newStatus }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Failed to update status", "error");
     }
   };
 
@@ -73,23 +114,24 @@ const MeetOurTeam = () => {
   const [contactForm, setContactForm] = useState({ id: null, name: '', designation: '', phone: '', email: '', photo: '' });
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [saving, setSaving] = useState(false);
 
-  // Helper function to dynamically resolve image paths safely
-  const resolvePhotoUrl = (photoPath) => {
-    if (!photoPath) return '';
-    if (photoPath.startsWith('http') || photoPath.startsWith('data:')) {
-      return photoPath;
-    }
-    // Ensures a clean single slash structure between the domain and relative assets/uploads
-    return photoPath.startsWith('/') ? `http://localhost:5000${photoPath}` : `http://localhost:5000/${photoPath}`;
-  };
+
+
 
   const fetchTeam = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/team');
-      setTeamContacts(res.data);
-    } catch (error) {
-      console.error('Error fetching team:', error);
+      const snap = await getDoc(
+        doc(db, "team_contacts", TEAM_DOC_ID)
+      );
+
+      if (snap.exists()) {
+        setTeamContacts(snap.data().data || []);
+      } else {
+        setTeamContacts([]);
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -111,62 +153,160 @@ const MeetOurTeam = () => {
   const handleEditContactClick = (contact) => {
     setContactForm({ ...contact });
     setPhotoFile(null);
-    setPhotoPreview(resolvePhotoUrl(contact.photo));
+    setPhotoPreview(contact.photo || null);
     setShowContactForm(true);
   };
 
+
   const handleDeleteContact = async (id) => {
+
     const result = await Swal.fire({
-      title: 'Delete Contact?',
-      text: 'This action cannot be undone.',
-      icon: 'warning',
+      title: "Delete Contact?",
+      text: "This action cannot be undone.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Delete',
+      confirmButtonColor: "#EF4444",
+      confirmButtonText: "Delete",
     });
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`http://localhost:5000/api/team/${id}`);
-        setTeamContacts((prev) => prev.filter((c) => c.id !== id));
-        Swal.fire({ title: 'Deleted!', icon: 'success', timer: 1200, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete contact.', 'error');
+
+    if (!result.isConfirmed) return;
+
+    try {
+
+      const snap = await getDoc(
+        doc(db, "team_contacts", TEAM_DOC_ID)
+      );
+
+      let contacts = [];
+
+      if (snap.exists()) {
+        contacts = [...(snap.data().data || [])];
       }
+
+      contacts = contacts.filter(
+        item => String(item.id) !== String(id)
+      );
+
+      await setDoc(
+        doc(db, "team_contacts", TEAM_DOC_ID),
+        {
+          data: contacts
+        },
+        {
+          merge: true
+        }
+      );
+
+      await fetchTeam();
+
+      Swal.fire({
+        title: "Deleted!",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+
+    } catch (err) {
+      console.error(err);
+
+      Swal.fire(
+        "Error",
+        "Failed to delete contact",
+        "error"
+      );
     }
   };
 
+
   const handleSaveContact = async () => {
     if (!contactForm.name) {
-      Swal.fire({ title: 'Error', text: 'Name is required', icon: 'error' });
+      Swal.fire("Error", "Name is required", "error");
       return;
     }
 
+    if (saving) return;
+
+    setSaving(true);
+    
+
     try {
-      let uploadedPhoto = contactForm.photo;
+      let photo = contactForm.photo;
+
       if (photoFile) {
-        const formData = new FormData();
-        formData.append('image', photoFile);
-        const res = await axios.post('http://localhost:5000/api/upload/team', formData);
-        uploadedPhoto = res.data.url;
+        photo = await uploadImage(photoFile);
       }
 
-      const payload = { ...contactForm, photo: uploadedPhoto };
+      const snap = await getDoc(
+        doc(db, "team_contacts", TEAM_DOC_ID)
+      );
+
+      let contacts = [];
+
+      if (snap.exists()) {
+        contacts = [...(snap.data().data || [])];
+      }
+
+      let maxId = contacts.reduce(
+        (max, item) => Math.max(max, Number(item.id) || 0),
+        0
+      );
 
       if (contactForm.id) {
-        // Edit
-        await axios.put(`http://localhost:5000/api/team/${contactForm.id}`, payload);
-        Swal.fire({ title: 'Updated!', icon: 'success', timer: 1200, showConfirmButton: false });
+
+        const index = contacts.findIndex(
+          c => String(c.id) === String(contactForm.id)
+        );
+
+        if (index !== -1) {
+          contacts[index] = {
+            ...contacts[index],
+            name: contactForm.name,
+            designation: contactForm.designation,
+            phone: contactForm.phone,
+            email: contactForm.email,
+            photo
+          };
+        }
+
       } else {
-        // Add
-        await axios.post('http://localhost:5000/api/team', payload);
-        Swal.fire({ title: 'Added!', icon: 'success', timer: 1200, showConfirmButton: false });
+
+        contacts.push({
+          id: String(maxId + 1),
+          created_at: new Date().toISOString(),
+          name: contactForm.name,
+          designation: contactForm.designation,
+          phone: contactForm.phone,
+          email: contactForm.email,
+          photo
+        });
+
       }
-      fetchTeam();
+
+      await setDoc(
+        doc(db, "team_contacts", TEAM_DOC_ID),
+        {
+          data: contacts
+        },
+        {
+          merge: true
+        }
+      );
+
+      Swal.fire({
+        title: contactForm.id ? "Updated!" : "Added!",
+        icon: "success",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+
+      await fetchTeam();
       setShowContactForm(false);
+
     } catch (err) {
       console.error(err);
-      Swal.fire('Error', 'Failed to save contact.', 'error');
+      Swal.fire("Error", "Failed to save contact", "error");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -178,16 +318,15 @@ const MeetOurTeam = () => {
           <h1 className="text-xl font-bold text-brand-dark">Contact Management</h1>
           <p className="text-sm text-brand-gray">Manage inquiries and team contact profiles</p>
         </div>
-        
+
         {/* Tab Selection */}
         <div className="flex border-b border-brand-border gap-6">
           {['inquiries', 'contacts'].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-semibold transition-all relative ${
-                activeTab === tab ? 'text-blue-600' : 'text-brand-gray hover:text-brand-dark'
-              }`}
+              className={`pb-3 text-sm font-semibold transition-all relative ${activeTab === tab ? 'text-blue-600' : 'text-brand-gray hover:text-brand-dark'
+                }`}
             >
               {tab === 'inquiries' ? 'User Inquiries' : 'Team Contacts'}
               {activeTab === tab && (
@@ -324,42 +463,42 @@ const MeetOurTeam = () => {
                     <MdClose size={24} />
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
-                    <UploadBox 
-                      label="Contact Photo" 
-                      value={photoPreview} 
+                    <UploadBox
+                      label="Contact Photo"
+                      value={photoPreview}
                       onChange={(file, preview) => {
                         setPhotoFile(file);
                         setPhotoPreview(preview);
-                      }} 
+                      }}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-brand-dark mb-1">Name <span className="text-red-500">*</span></label>
-                    <input 
+                    <input
                       type="text" className="input-field w-full" placeholder="e.g. Shahin"
                       value={contactForm.name} onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-brand-dark mb-1">Designation</label>
-                    <input 
+                    <input
                       type="text" className="input-field w-full" placeholder="e.g. BD MANAGER - PATENT"
                       value={contactForm.designation} onChange={(e) => setContactForm({ ...contactForm, designation: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-brand-dark mb-1">Phone Number</label>
-                    <input 
+                    <input
                       type="text" className="input-field w-full" placeholder="e.g. +91 9003025706"
                       value={contactForm.phone} onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-brand-dark mb-1">Email <span className="text-red-500">*</span></label>
-                    <input 
+                    <input
                       type="email" className="input-field w-full" placeholder="e.g. patent.bbinternational@gmail.com"
                       value={contactForm.email} onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                     />
@@ -367,7 +506,13 @@ const MeetOurTeam = () => {
                 </div>
                 <div className="flex justify-end gap-3 mt-6">
                   <button onClick={() => setShowContactForm(false)} className="btn-outline">Cancel</button>
-                  <button onClick={handleSaveContact} className="btn-primary">Save Contact</button>
+                  <button
+                    onClick={handleSaveContact}
+                    disabled={saving}
+                    className="btn-primary disabled:opacity-50"
+                  >
+                    {saving ? "Saving..." : "Save Contact"}
+                  </button>
                 </div>
               </div>
             ) : (
@@ -377,13 +522,13 @@ const MeetOurTeam = () => {
                     <MdAdd /> Add Contact
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {teamContacts.map((contact) => (
                     <div key={contact.id} className="card overflow-hidden group">
                       <div className="aspect-[4/3] bg-gray-100 relative overflow-hidden">
                         {contact.photo ? (
-                          <img src={resolvePhotoUrl(contact.photo)} alt={contact.name} className="w-full h-full object-cover" />
+                          <img src={contact.photo} alt={contact.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-blue-50 text-blue-200">
                             <MdPerson size={64} />
@@ -401,7 +546,7 @@ const MeetOurTeam = () => {
                       <div className="p-4 text-center">
                         <h3 className="font-bold text-brand-dark text-lg">{contact.name}</h3>
                         <p className="text-xs font-semibold text-blue-600 tracking-wide uppercase mt-1 mb-3">{contact.designation}</p>
-                        
+
                         <div className="space-y-2 text-sm text-brand-gray bg-gray-50 rounded-xl p-3">
                           <div className="flex items-center justify-center gap-2">
                             <MdPhone className="text-teal-600 flex-shrink-0" />

@@ -3,6 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { MdGroups, MdAdd, MdEdit, MdDelete, MdSearch, MdCloudUpload } from 'react-icons/md';
 import axios from 'axios';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
+
+// Handles both legacy records where `dates` was saved as a JSON string,
+// and current records where `dates` is already a plain object.
+const getConferenceDate = (dates) => {
+  if (!dates) return "N/A";
+
+  if (typeof dates === "object") {
+    return dates.conferenceDate || "N/A";
+  }
+
+  if (typeof dates === "string") {
+    try {
+      const parsed = JSON.parse(dates);
+      return parsed.conferenceDate || "N/A";
+    } catch (error) {
+      return "N/A";
+    }
+  }
+
+  return "N/A";
+};
 
 const Conferences = () => {
   const navigate = useNavigate();
@@ -10,38 +39,84 @@ const Conferences = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const fetchConferences = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/conferences');
-        setConferences(res.data);
-      } catch (error) {
-        console.error('Error fetching conferences:', error);
-      }
-    };
     fetchConferences();
   }, []);
 
-  const handleDelete = (id) => {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#2563EB',
-      confirmButtonText: 'Yes, delete it!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await axios.delete(`http://localhost:5000/api/conferences/${id}`);
-          setConferences(conferences.filter(c => c.id !== id));
-          Swal.fire('Deleted!', 'Conference has been removed.', 'success');
-        } catch (error) {
-          console.error('Error deleting conference:', error);
-          Swal.fire('Error!', 'Failed to delete conference.', 'error');
+  const fetchConferences = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "conferences (2)"));
+
+      let allConferences = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+
+        if (Array.isArray(data.data)) {
+          allConferences.push(...data.data);
         }
-      }
+      });
+
+      setConferences(allConferences);
+    } catch (error) {
+      console.error("Error fetching conferences:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#2563EB",
+      confirmButtonText: "Yes, delete it!",
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "conferences (2)"));
+
+      let tableDocId = "";
+      let conferenceArray = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+
+        if (Array.isArray(data.data)) {
+          tableDocId = d.id;
+          conferenceArray = data.data;
+        }
+      });
+
+      conferenceArray = conferenceArray.filter(
+        (conf) => String(conf.id) !== String(id)
+      );
+
+      await updateDoc(
+        doc(db, "conferences (2)", tableDocId),
+        {
+          data: conferenceArray,
+        }
+      );
+
+      setConferences(conferenceArray);
+
+      Swal.fire(
+        "Deleted!",
+        "Conference has been removed.",
+        "success"
+      );
+    } catch (error) {
+      console.error(error);
+
+      Swal.fire(
+        "Error!",
+        "Failed to delete conference.",
+        "error"
+      );
+    }
   };
 
   // UPDATED: Filter conditions updated to use lowercase database naming configurations safely
@@ -105,9 +180,9 @@ const Conferences = () => {
                     {conf.conferencetitle || 'N/A'}
                   </p>
                 </td>
-                {/* UPDATED: Accurately reads from structural data object (conf.dates.conferenceDate) */}
+                {/* Safely reads conferenceDate whether dates is a string or object */}
                 <td className="px-4 py-4 text-sm text-gray-600">
-                  {conf.dates?.conferenceDate || 'N/A'}
+                  {getConferenceDate(conf.dates)}
                 </td>
                 <td className="px-4 py-4 text-sm text-gray-600">
                   <span className="text-xs font-semibold bg-blue-50 text-blue-700 px-2 py-1 rounded">

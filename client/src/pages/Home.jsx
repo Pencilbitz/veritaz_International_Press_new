@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle } from "lucide-react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function Home() {
 
@@ -29,10 +31,28 @@ export default function Home() {
     const [testimonials, setTestimonials] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/testimonials")
-            .then(res => res.json())
-            .then(data => setTestimonials(data))
-            .catch(err => console.error("Error fetching testimonials:", err));
+        const fetchTestimonials = async () => {
+            try {
+                const snapshot = await getDocs(collection(db, "testimonials"));
+
+                const docs = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+
+                const tableDoc = docs.find(doc => doc.type === "table");
+
+                if (tableDoc && Array.isArray(tableDoc.data)) {
+                    setTestimonials(tableDoc.data);
+                } else {
+                    setTestimonials([]);
+                }
+            } catch (error) {
+                console.error("Error fetching testimonials:", error);
+            }
+        };
+
+        fetchTestimonials();
     }, []);
 
     useEffect(() => {

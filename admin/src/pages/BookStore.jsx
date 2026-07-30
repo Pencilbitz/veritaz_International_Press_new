@@ -16,6 +16,13 @@ import {
 } from 'react-icons/md';
 
 import { authorsList, yearsList } from '../data/dummyData';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 const BookStore = () => {
   const navigate = useNavigate();
@@ -36,8 +43,21 @@ const BookStore = () => {
 
   const fetchBooks = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/books');
-      setBooks(res.data);
+      setIsLoading(true);
+
+      const snapshot = await getDocs(collection(db, "books (5)"));
+
+      let allBooks = [];
+
+      snapshot.forEach((doc) => {
+        const docData = doc.data();
+
+        if (Array.isArray(docData.data)) {
+          allBooks.push(...docData.data);
+        }
+      });
+
+      setBooks(allBooks);
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,14 +67,27 @@ const BookStore = () => {
 
   // Filtered logic aligning with fields from database schema
   const filtered = books.filter((b) => {
-    const matchSearch = !search ||
-      (b.title && b.title.toLowerCase().includes(search.toLowerCase())) ||
-      (b.author && b.author.toLowerCase().includes(search.toLowerCase())) ||
-      (b.isbn && b.isbn.includes(search));
-    const matchAuthor = !filterAuthor || b.author === filterAuthor;
-    const matchYear = !filterYear || Number(b.year) === Number(filterYear);
-    const matchStatus = filterStatus === 'All' ? true : b.status === filterStatus;
-    return matchSearch && matchAuthor && matchYear && matchStatus;
+    const matchSearch =
+      !search ||
+      b.title?.toLowerCase().includes(search.toLowerCase()) ||
+      b.authors?.toLowerCase().includes(search.toLowerCase()) ||
+      b.isbn?.includes(search);
+
+    const matchAuthor =
+      !filterAuthor || b.authors === filterAuthor;
+
+    const matchYear =
+      !filterYear || Number(b.year) === Number(filterYear);
+
+    const matchStatus =
+      filterStatus === "All" || b.status === filterStatus;
+
+    return (
+      matchSearch &&
+      matchAuthor &&
+      matchYear &&
+      matchStatus
+    );
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
@@ -82,52 +115,102 @@ const BookStore = () => {
   };
 
   const handleBulkDelete = async () => {
-    if (selectedBooks.length === 0) return;
+    if (!selectedBooks.length) return;
 
-    const result = await Swal.fire({
-      title: 'Delete Selected Books?',
-      text: `Are you sure you want to delete ${selectedBooks.length} books? This cannot be undone.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Yes, Delete All',
-      cancelButtonText: 'Cancel',
-      borderRadius: '16px',
-    });
+    try {
+      const snapshot = await getDocs(collection(db, "books (5)"));
 
-    if (result.isConfirmed) {
-      try {
-        await Promise.all(selectedBooks.map(id => axios.delete(`http://localhost:5000/api/books/${id}`)));
-        setBooks((prev) => prev.filter((b) => !selectedBooks.includes(b.id || b._id)));
-        setSelectedBooks([]);
-        Swal.fire({ title: 'Deleted!', text: 'Selected books removed.', icon: 'success', timer: 1500, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete some books.', 'error');
+      let tableDocId = "";
+      let booksArray = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+        if (Array.isArray(data.data)) {
+          tableDocId = d.id;
+          booksArray = data.data;
+        }
+      });
+
+      if (!tableDocId) {
+        Swal.fire("Error", "Could not locate books document in database.", "error");
+        return;
       }
+
+      // Convert all selected IDs to Strings for accurate comparison
+      const selectedIds = selectedBooks.map(String);
+
+      // Filter out deleted books matching either b.id or b._id
+      const updatedBooksArray = booksArray.filter((b) => {
+        const bookId = String(b.id || b._id);
+        return !selectedIds.includes(bookId);
+      });
+
+      // Update Firestore document
+      await updateDoc(doc(db, "books (5)", tableDocId), {
+        data: updatedBooksArray
+      });
+
+      // Update local state
+      setBooks(updatedBooksArray);
+      setSelectedBooks([]);
+
+      Swal.fire("Deleted!", "Selected books have been deleted.", "success");
+    } catch (error) {
+      console.error("Bulk Delete Error:", error);
+      Swal.fire("Error", "Failed to delete selected books.", "error");
     }
   };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: 'Delete Book?',
-      text: 'This action cannot be undone.',
-      icon: 'warning',
+      title: "Delete Book?",
+      text: "This action cannot be undone.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#6B7280',
-      confirmButtonText: 'Yes, Delete',
-      cancelButtonText: 'Cancel',
-      borderRadius: '16px',
+      confirmButtonText: "Yes, delete it!"
     });
-    if (result.isConfirmed) {
-      try {
-        await axios.delete(`http://localhost:5000/api/books/${id}`);
-        setBooks((prev) => prev.filter((b) => (b.id || b._id) !== id));
-        Swal.fire({ title: 'Deleted!', text: 'Book removed.', icon: 'success', timer: 1500, showConfirmButton: false });
-      } catch (err) {
-        Swal.fire('Error', 'Failed to delete book.', 'error');
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const snapshot = await getDocs(collection(db, "books (5)"));
+
+      let tableDocId = "";
+      let booksArray = [];
+
+      snapshot.forEach((d) => {
+        const data = d.data();
+        if (Array.isArray(data.data)) {
+          tableDocId = d.id;
+          booksArray = data.data;
+        }
+      });
+
+      if (!tableDocId) {
+        Swal.fire("Error", "Could not locate books document in database.", "error");
+        return;
       }
+
+      // Filter out deleted book matching either b.id or b._id
+      const updatedBooksArray = booksArray.filter(
+        (b) => String(b.id || b._id) !== String(id)
+      );
+
+      // Update Firestore document
+      await updateDoc(doc(db, "books (5)", tableDocId), {
+        data: updatedBooksArray
+      });
+
+      // Update local UI state
+      setBooks(updatedBooksArray);
+
+      // Clear ID from selected list if present
+      setSelectedBooks((prev) => prev.filter((item) => String(item) !== String(id)));
+
+      Swal.fire("Deleted!", "Book has been removed.", "success");
+    } catch (error) {
+      console.error("Delete Error:", error);
+      Swal.fire("Error", "Failed to delete the book.", "error");
     }
   };
 
@@ -293,13 +376,7 @@ const BookStore = () => {
                   >
                     <div className="relative">
                       <img
-                        src={
-                          book.cover1
-                            ? book.cover1.startsWith("http")
-                              ? book.cover1
-                              : `http://localhost:5000${book.cover1}`
-                            : "https://placehold.co/240x320?text=No+Cover"
-                        }
+                        src={book.cover1}
                         alt={book.title}
                         className="w-full h-64 object-cover"
                         onError={(e) => {
@@ -425,10 +502,7 @@ const BookStore = () => {
                               <img
                                 src={
                                   book.cover1
-                                    ? book.cover1.startsWith("http")
-                                      ? book.cover1
-                                      : `http://localhost:5000${book.cover1.startsWith('/') ? '' : '/'}${book.cover1}`
-                                    : "https://placehold.co/40x60?text=Book"
+
                                 }
                                 className="w-10 h-14 rounded object-cover shadow-sm shrink-0"
                                 onError={(e) => {

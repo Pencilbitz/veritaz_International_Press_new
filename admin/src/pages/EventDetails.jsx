@@ -5,6 +5,15 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import { MdChevronLeft, MdSave } from 'react-icons/md';
 import UploadBox from '../components/UploadBox';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
+import { uploadImage } from "../json_data/cloudinary"
 
 const format12Hour = (time24) => {
   if (!time24) return '';
@@ -34,8 +43,11 @@ const EventDetails = () => {
   const { id } = useParams();
   const isNew = !id;
 
-  const [posterUrl, setPosterUrl] = useState(null);
+  const [posterUrl, setPosterUrl] = useState("");
+  const [certificateUrl, setCertificateUrl] = useState("");
+
   const [posterFile, setPosterFile] = useState(null);
+  const [certificateFile, setCertificateFile] = useState(null);
 
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: { status: 'Upcoming' },
@@ -43,66 +55,104 @@ const EventDetails = () => {
   const status = watch('status');
 
   useEffect(() => {
-    if (!isNew) {
-      axios.get(`http://localhost:5000/api/events/${id}`)
-        .then(res => {
-          const e = res.data;
+    if (isNew) return;
 
-          let fromT = '';
-          let toT = '';
-          if (e.time) {
-            const parts = e.time.split('-');
-            if (parts.length === 2) {
-              fromT = format24Hour(parts[0]);
-              toT = format24Hour(parts[1]);
-            } else {
-              fromT = format24Hour(e.time);
-            }
+    const fetchEvent = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "events (2)"));
+
+        let tableDocId = "";
+        let events = [];
+
+        snapshot.forEach((d) => {
+          const data = d.data();
+
+          if (Array.isArray(data.data)) {
+            tableDocId = d.id;
+            events = data.data;
           }
+        });
 
-          // Map DB fields back to form fields matching the schema
-          reset({
-            collegeName: e.collegeName || '',
-            topic: e.topic || '',
-            date: e.date ? e.date.split('T')[0] : '',
-            fromTime: fromT,
-            toTime: toT,
-            location: e.location || '',
-            contact1: e.contact1 || '',
-            contact2: e.contact2 || '',
-            registrationLink: e.registrationLink || '',
-            registerButtonText: e.registerButtonText || 'Register Now',
-            status: e.status || 'Upcoming'
-          });
-          if (e.poster) setPosterUrl(`http://localhost:5000${e.poster}`);
-        })
-        .catch(err => console.error("Error fetching event details", err));
-    }
+        const e = events.find(
+          (item) => String(item.id) === String(id)
+        );
+
+        if (!e) return;
+
+        let fromT = "";
+        let toT = "";
+
+        if (e.time) {
+          const parts = e.time.split("-");
+
+          if (parts.length === 2) {
+            fromT = format24Hour(parts[0]);
+            toT = format24Hour(parts[1]);
+          } else {
+            fromT = format24Hour(e.time);
+          }
+        }
+
+        reset({
+          collegeName: e.collegeName || "",
+          topic: e.topic || "",
+          date: e.date || "",
+          fromTime: fromT,
+          toTime: toT,
+          location: e.location || "",
+          contact1: e.contact1 || "",
+          contact2: e.contact2 || "",
+          registrationLink: e.registrationLink || "",
+          registerButtonText: e.registerButtonText || "Register Now",
+          status: e.status || "Upcoming"
+        });
+
+        if (e.poster) {
+          setPosterUrl(e.poster);
+        }
+
+        if (e.certificate) {
+          setCertificateUrl(e.certificate);
+        }
+
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchEvent();
+
   }, [id, isNew, reset]);
 
   const onSubmit = async (data) => {
     try {
-      let uploadedPosterUrl = posterUrl ? posterUrl.replace('http://localhost:5000', '') : null;
 
+      let uploadedPosterUrl = posterUrl;
+      let uploadedCertificateUrl = certificateUrl;
+
+      // Upload poster only if user selected a new one
       if (posterFile) {
-        const formData = new FormData();
-        formData.append('image', posterFile);
-
-        const uploadRes = await axios.post('http://localhost:5000/api/upload/events', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        uploadedPosterUrl = uploadRes.data.url;
+        uploadedPosterUrl = await uploadImage(posterFile);
       }
 
-      let combinedTime = '';
+      // Upload certificate only if user selected a new one
+      if (certificateFile) {
+        uploadedCertificateUrl = await uploadImage(certificateFile);
+      }
+
+      // Upload to Cloudinary here if posterFile exists
+      // uploadedPosterUrl = returnedCloudinaryURL;
+
+      let combinedTime = "";
+
       if (data.fromTime && data.toTime) {
         combinedTime = `${format12Hour(data.fromTime)} - ${format12Hour(data.toTime)}`;
       } else if (data.fromTime) {
         combinedTime = format12Hour(data.fromTime);
       }
 
-      // Payload properties explicitly set to match SQL columns
       const payload = {
+        id: isNew ? Date.now().toString() : id,
         collegeName: data.collegeName,
         topic: data.topic,
         date: data.date,
@@ -111,22 +161,77 @@ const EventDetails = () => {
         contact1: data.contact1,
         contact2: data.contact2,
         registrationLink: data.registrationLink,
-        registerButtonText: data.registerButtonText || 'Register Now',
+        registerButtonText: data.registerButtonText,
         status: data.status,
-        poster: uploadedPosterUrl
+        poster: uploadedPosterUrl,
+        certificate: uploadedCertificateUrl
       };
 
+      const snapshot = await getDocs(collection(db, "events (2)"));
+
+      let tableDocId = "";
+      let events = [];
+
+      snapshot.forEach((d) => {
+        const docData = d.data();
+
+        if (Array.isArray(docData.data)) {
+          tableDocId = d.id;
+          events = docData.data;
+        }
+      });
+
       if (isNew) {
-        await axios.post('http://localhost:5000/api/events', payload);
+        events.push(payload);
       } else {
-        await axios.put(`http://localhost:5000/api/events/${id}`, payload);
+        const index = events.findIndex(
+          (e) => String(e.id) === String(id)
+        );
+
+        if (index !== -1) {
+          events[index] = payload;
+        }
       }
 
-      Swal.fire({ title: 'Saved!', icon: 'success', timer: 1500, showConfirmButton: false, confirmButtonColor: '#2563EB' });
-      navigate('/admin/events');
+      const cleanedEvents = events.map((event) => ({
+        id: event.id || "",
+        collegeName: event.collegeName || "",
+        topic: event.topic || "",
+        date: event.date || "",
+        time: event.time || "",
+        location: event.location || "",
+        contact1: event.contact1 || "",
+        contact2: event.contact2 || "",
+        registrationLink: event.registrationLink || "",
+        registerButtonText: event.registerButtonText || "Register Now",
+        status: event.status || "Upcoming",
+        poster: event.poster || "",
+        certificate: event.certificate || ""
+      }));
+
+      await updateDoc(doc(db, "events (2)", tableDocId), {
+        data: cleanedEvents
+
+      });
+
+
+      Swal.fire({
+        title: "Saved!",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      navigate("/admin/events");
+
     } catch (err) {
       console.error(err);
-      Swal.fire('Error', 'Failed to save event', 'error');
+
+      Swal.fire(
+        "Error",
+        "Failed to save event",
+        "error"
+      );
     }
   };
 
@@ -157,11 +262,34 @@ const EventDetails = () => {
           <h3 className="section-title mb-4 pb-2 border-b border-blue-100">
             Event Poster
           </h3>
-          <UploadBox
-            label="Poster"
-            value={posterUrl}
-            onChange={(file, p) => { setPosterFile(file); setPosterUrl(p); }}
-          />
+          <div>
+            <label className="label">Poster</label>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+
+                if (!file) return;
+
+                // Save file only
+                setPosterFile(file);
+
+                // Preview only
+                setPosterUrl(URL.createObjectURL(file));
+              }}
+            />
+
+            {posterUrl && (
+              <img
+                src={posterUrl}
+                className="mt-3 w-48 rounded-lg border"
+                alt="Poster"
+              />
+            )}
+
+          </div>
         </div>
 
         {/* Section: General Info */}
@@ -246,12 +374,38 @@ const EventDetails = () => {
 
             <div>
 
-              <UploadBox
-                label="Certificate"
-                accept="image/*,application/pdf"
-                value={posterUrl}
-                onChange={(file, p) => { setPosterFile(file); setPosterUrl(p); }}
-              />
+              <div>
+                <label className="label">Certificate</label>
+
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+
+                    if (!file) return;
+
+                    // Save file only
+                    setCertificateFile(file);
+
+                    // Preview image
+                    if (file.type.startsWith("image/")) {
+                      setCertificateUrl(URL.createObjectURL(file));
+                    }
+                  }}
+                />
+
+                {certificateUrl && (
+                  <a
+                    href={certificateUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline"
+                  >
+                    View Certificate
+                  </a>
+                )}
+              </div>
             </div>
 
             {/* Event Status */}

@@ -7,6 +7,15 @@ import {
   MdStar, MdFilterList, MdCloudUpload, MdPlayCircleOutline,
 } from 'react-icons/md';
 import axios from 'axios';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  writeBatch,
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
 
 const StarDisplay = ({ rating }) => (
   <div className="flex items-center gap-0.5">
@@ -27,25 +36,39 @@ const Testimonials = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchTestimonials = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/testimonials');
-        setTestimonials(response.data);
-      } catch (error) {
-        console.error('Error fetching testimonials:', error);
-      }
-    };
     fetchTestimonials();
   }, []);
+
+  // Testimonials are spread across several documents in the "testimonials"
+  // collection, each holding a `data` array (see AddTestimonial.jsx). Read
+  // every doc and flatten their arrays into one list.
+  const fetchTestimonials = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "testimonials"));
+
+      let allTestimonials = [];
+
+      snapshot.forEach((d) => {
+        const raw = d.data();
+        if (Array.isArray(raw.data)) {
+          allTestimonials.push(...raw.data);
+        }
+      });
+
+      setTestimonials(allTestimonials);
+    } catch (err) {
+      console.error("Error fetching testimonials:", err);
+    }
+  };
 
   const filtered = testimonials.filter((t) => {
     const q = search.toLowerCase();
     // 🌟 Updated to match new text keys: name and content
-    const matchSearch = !search || 
-      (t.name && t.name.toLowerCase().includes(q)) || 
+    const matchSearch = !search ||
+      (t.name && t.name.toLowerCase().includes(q)) ||
       (t.content && t.content.toLowerCase().includes(q)) ||
       (t.designation && t.designation.toLowerCase().includes(q));
-      
+
     // 🌟 Updated filter query to check if it's a video vs text testimonial
     let matchType = true;
     if (filterType === 'video') matchType = t.is_video_testimonial === true;
@@ -56,6 +79,36 @@ const Testimonials = () => {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  // Finds which doc in the collection holds the testimonial with the given
+  // id, and removes it from that doc's array, updating just that doc.
+  const removeTestimonialById = async (id) => {
+    const snapshot = await getDocs(collection(db, "testimonials"));
+
+    let tableDocId = null;
+    let updatedArray = [];
+    let found = false;
+
+    snapshot.forEach((d) => {
+      const raw = d.data();
+      if (!Array.isArray(raw.data)) return;
+
+      const index = raw.data.findIndex((t) => String(t.id) === String(id));
+      if (index !== -1) {
+        found = true;
+        tableDocId = d.id;
+        updatedArray = raw.data.filter((t) => String(t.id) !== String(id));
+      }
+    });
+
+    if (!found) {
+      throw new Error("Testimonial not found.");
+    }
+
+    await updateDoc(doc(db, "testimonials", tableDocId), {
+      data: updatedArray,
+    });
+  };
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -69,8 +122,8 @@ const Testimonials = () => {
     });
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/testimonials/${id}`);
-        setTestimonials((prev) => prev.filter((t) => t.id !== id));
+        await removeTestimonialById(id);
+        setTestimonials((prev) => prev.filter((t) => String(t.id) !== String(id)));
         setSelected((prev) => prev.filter((s) => s !== id));
         Swal.fire({ title: 'Deleted!', icon: 'success', timer: 1200, showConfirmButton: false });
       } catch (error) {
@@ -91,8 +144,25 @@ const Testimonials = () => {
     });
     if (result.isConfirmed) {
       try {
-        await Promise.all(selected.map(id => axios.delete(`http://localhost:5000/api/testimonials/${id}`)));
-        setTestimonials((prev) => prev.filter((t) => !selected.includes(t.id)));
+        // Group affected ids by which doc actually holds them, then batch
+        // one array update per doc.
+        const snapshot = await getDocs(collection(db, "testimonials"));
+        const batch = writeBatch(db);
+        const selectedSet = new Set(selected.map(String));
+
+        snapshot.forEach((d) => {
+          const raw = d.data();
+          if (!Array.isArray(raw.data)) return;
+
+          const stillHasSelected = raw.data.some((t) => selectedSet.has(String(t.id)));
+          if (!stillHasSelected) return;
+
+          const updatedArray = raw.data.filter((t) => !selectedSet.has(String(t.id)));
+          batch.update(doc(db, "testimonials", d.id), { data: updatedArray });
+        });
+
+        await batch.commit();
+        setTestimonials((prev) => prev.filter((t) => !selectedSet.has(String(t.id))));
         setSelected([]);
         Swal.fire({ title: 'Done!', icon: 'success', timer: 1200, showConfirmButton: false });
       } catch (error) {
@@ -119,7 +189,7 @@ const Testimonials = () => {
     reader.onload = async (event) => {
       try {
         let json = JSON.parse(event.target.result);
-        
+
         if (Array.isArray(json)) {
           json = { testimonials: json };
         } else if (!json.testimonials) {
@@ -128,10 +198,11 @@ const Testimonials = () => {
 
         Swal.fire({ title: 'Importing...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         const res = await axios.post('http://localhost:5000/api/import', json);
-        
-        const response = await axios.get('http://localhost:5000/api/testimonials');
-        setTestimonials(response.data);
-        
+
+        // Re-read from Firestore so the list reflects whatever the import
+        // endpoint actually wrote.
+        await fetchTestimonials();
+
         Swal.fire('Success', res.data.message || 'Imported successfully!', 'success');
       } catch (err) {
         console.error('Import error:', err);
@@ -164,12 +235,12 @@ const Testimonials = () => {
               <MdDelete /> Delete ({selected.length})
             </motion.button>
           )}
-          <input 
-            type="file" 
-            accept=".json" 
-            ref={fileInputRef} 
-            onChange={handleImportJSON} 
-            style={{ display: 'none' }} 
+          <input
+            type="file"
+            accept=".json"
+            ref={fileInputRef}
+            onChange={handleImportJSON}
+            style={{ display: 'none' }}
           />
           <button onClick={() => fileInputRef.current.click()} className="btn-outline text-sm">
             <MdCloudUpload /> Import JSON

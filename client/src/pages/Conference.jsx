@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function Conference() {
   const { id } = useParams();
@@ -10,29 +12,69 @@ export default function Conference() {
   useEffect(() => {
     const fetchConference = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/conferences/${id}`);
-        const rawData = res.data;
+        const snapshot = await getDocs(collection(db, "conferences (2)"));
 
-        if (rawData && !rawData.message) {
-          const normalizedData = {
-            ...rawData,
-            conferencename: rawData.conferencename || rawData.conferenceName || "",
-            conferencetitle: rawData.conferencetitle || rawData.title || "",
-            about: rawData.about || rawData.aboutConference || "",
-            brochuredownload: rawData.brochuredownload || rawData.brochure || null,
-            proceedingsdownload: rawData.proceedingsdownload || rawData.conferenceProceeding || null,
-            certificatesdownload: rawData.certificatesdownload || rawData.certificateTracks || null
+        const conferences = [];
+
+        snapshot.forEach((doc) => {
+          const docData = doc.data();
+
+          if (Array.isArray(docData.data)) {
+            conferences.push(...docData.data);
+          }
+        });
+
+        console.log("All Conferences:", conferences);
+        console.log("URL id:", id);
+
+        const selectedConference = conferences.find(
+          item => String(item.id) === String(id)
+        );
+
+        console.log("Selected:", selectedConference);
+
+        if (selectedConference) {
+          const normalize = (value, fallback) => {
+            if (!value) return fallback;
+
+            if (typeof value === "string") {
+              try {
+                return JSON.parse(value);
+              } catch {
+                return fallback;
+              }
+            }
+
+            return value;
           };
-          setConference(normalizedData);
+
+          setConference({
+            ...selectedConference,
+
+            topics: normalize(selectedConference.topics, []),
+            speakers: normalize(selectedConference.speakers, []),
+            organizingcommittee: normalize(selectedConference.organizingcommittee, []),
+            advisorycommittee: normalize(selectedConference.advisorycommittee, []),
+            globalexperts: normalize(selectedConference.globalexperts, []),
+            certificatesdownload: normalize(selectedConference.certificatesdownload, []),
+
+            fees: normalize(selectedConference.fees, {}),
+
+            dates: normalize(selectedConference.dates, {}),
+
+            bankdetails: normalize(selectedConference.bankdetails, {}),
+          });
         } else {
-          setConference(rawData);
+          setConference(null);
         }
+
       } catch (err) {
-        console.error("Error fetching conference:", err);
+        console.error(err);
       } finally {
         setLoading(false);
       }
     };
+
     fetchConference();
   }, [id]);
 

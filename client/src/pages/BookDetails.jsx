@@ -7,6 +7,8 @@ import {
   MdPeopleOutline, MdClose, MdBusiness
 } from 'react-icons/md';
 import { FaWhatsapp, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function BookDetails() {
   const { slug } = useParams(); // Maps to the API's book ID
@@ -21,29 +23,50 @@ export default function BookDetails() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
-  const getImageUrl = (url) => url ? (url.startsWith('http') ? url : `http://localhost:5000${url}`) : 'https://placehold.co/300x400/EEE/31343C?text=No+Cover';
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/books/${slug}`)
-      .then(res => res.json())
-      .then(data => {
-        // Handle database array or object responses
-        const bookData = Array.isArray(data) ? data[0] : data;
+    const fetchBook = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "books (5)"));
 
-        if (!bookData || bookData.message) {
-          setError('Book not found');
+        let books = [];
+
+        snapshot.forEach((doc) => {
+          const docData = doc.data();
+
+          if (Array.isArray(docData.data)) {
+            books.push(...docData.data);
+          }
+        });
+
+        console.log("All Books:", books);
+        console.log("URL Param:", slug);
+
+        // Search by id (recommended)
+        const bookData = books.find(
+          (book) => String(book.id) === String(slug)
+        );
+
+        // If your URL actually contains a slug instead of id, use this instead:
+        // const bookData = books.find(book => book.slug === slug);
+
+        console.log("Selected Book:", bookData);
+
+        if (!bookData) {
+          setError("Book not found");
         } else {
           setBook(bookData);
-          // FIX 1: Set default preview to cover1 matching API keys
           setCurrentImage(bookData.cover1 || "");
         }
-        setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error fetching book:", err);
-        setError('Book not found or server error');
+        setError("Book not found or server error");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchBook();
   }, [slug]);
 
   // Form states for checkout flow
@@ -109,7 +132,7 @@ export default function BookDetails() {
           <div className="lg:col-span-4 flex flex-col gap-4">
             <div className="bg-[#f0f4f8] rounded-2xl p-6 flex flex-col items-center justify-center shadow-sm relative">
               <img
-                src={getImageUrl(currentImage || book.cover1)}
+                src={book.cover1}
                 alt={book.title}
                 className="w-full max-w-[280px] object-cover rounded-md shadow-2xl mb-8"
                 onError={(e) => { e.target.src = 'https://placehold.co/300x400/EEE/31343C?text=No+Cover'; }}
@@ -124,7 +147,7 @@ export default function BookDetails() {
                   className={`w-16 h-20 rounded border-2 overflow-hidden shadow-md cursor-pointer bg-white ${currentImage === book.cover1 ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setCurrentImage(book.cover1)}
                 >
-                  <img src={getImageUrl(book.cover1)} alt="Front Cover" className="w-full h-full object-cover" />
+                  <img src={book.cover1} alt="Front Cover" className="w-full h-full object-cover" />
                 </div>
                 {/* FIX 3: Updated reference from book.backCover to book.cover2 */}
                 <div
@@ -132,7 +155,7 @@ export default function BookDetails() {
                   onClick={() => setCurrentImage(book.cover2 || book.cover1)}
                 >
                   {book.cover2 ? (
-                    <img src={getImageUrl(book.cover2)} alt="Back Preview" className="w-full h-full object-cover" />
+                    <img src={book.cover2} alt="Back Preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex flex-col">
                       <div className="h-1/2 bg-gray-800 flex items-center justify-center text-[8px] text-white p-1 text-center">Full Preview</div>
@@ -253,7 +276,7 @@ export default function BookDetails() {
                   </a>
                 </div>
               )}
-            
+
 
               {/* About this Book */}
               <div className="mb-8">

@@ -1,19 +1,45 @@
 import { useState, useEffect } from "react";
 import { Search, Barcode } from "lucide-react";
 import { Link } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
 
 export default function BookStore() {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/books")
-      .then((res) => res.json())
-      .then((data) => {
-        // FIX 1: Changed status filter from 'Published' to 'In Stock' to match your API
-        setBooks(data.filter(b => b.status === 'In Stock'));
-      })
-      .catch((err) => console.error("Error fetching books:", err));
+    const fetchBooks = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, "books (5)"));
+
+        let books = [];
+
+        snapshot.forEach((doc) => {
+          const docData = doc.data();
+
+          // If your Firestore stores the books inside a data array
+          if (Array.isArray(docData.data)) {
+            books.push(...docData.data);
+          }
+        });
+
+        console.log("All Books:", books);
+
+        // Filter only In Stock books
+        const inStockBooks = books.filter(
+          (book) => book.status === "In Stock"
+        );
+
+        console.log("In Stock Books:", inStockBooks);
+
+        setBooks(inStockBooks);
+      } catch (err) {
+        console.error("Error fetching books:", err);
+      }
+    };
+
+    fetchBooks();
   }, []);
 
   const filteredBooks = books.filter((book) => {
@@ -65,7 +91,7 @@ export default function BookStore() {
             >
               {/* FIX 3: Changed book.cover to book.cover1 to match API structure */}
               <img
-                src={book.cover1 ? (book.cover1.startsWith('http') ? book.cover1 : `http://localhost:5000${book.cover1}`) : ''}
+                src={book.cover1}
                 alt={book.title}
                 className="mx-auto h-64 object-cover rounded mb-4"
                 onError={(e) => { e.target.src = "https://via.placeholder.com/150x200?text=No+Cover" }}

@@ -7,17 +7,36 @@ import CompletedEvents from "../components/CompletedEvents";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../json_data/firebase";
+
 
 export default function Events() {
     const [events, setEvents] = useState([]);
 
     useEffect(() => {
-        fetch("http://localhost:5000/api/events")
-            .then(res => res.json())
-            .then(data => {
-                setEvents(data);
-            })
-            .catch(err => console.error("Error fetching events:", err));
+        const fetchEvents = async () => {
+            try {
+                const snapshot = await getDocs(collection(db, "events (2)"));
+
+                let events = [];
+
+                snapshot.forEach((doc) => {
+                    const docData = doc.data();
+
+                    if (Array.isArray(docData.data)) {
+                        events = [...events, ...docData.data];
+                    }
+                });
+
+                console.log("Events:", events);
+                setEvents(events);
+            } catch (err) {
+                console.error("Error fetching events:", err);
+            }
+        };
+
+        fetchEvents();
     }, []);
 
     const upcomingEvents = events.filter(e => e.status !== "Completed");
@@ -99,8 +118,8 @@ export default function Events() {
                         {upcomingEvents.map((event) => (
                             <SwiperSlide key={event.id}>
                                 <div className="p-0 bg-gray-200">
-                                    <Link 
-                                        to={`/upcoming-events/${event.id}`} 
+                                    <Link
+                                        to={`/upcoming-events/${event.id}`}
                                         className="block bg-gray-200 overflow-hidden"
                                     >
                                         <img

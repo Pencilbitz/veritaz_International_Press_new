@@ -10,6 +10,16 @@ import {
 } from 'react-icons/md';
 import axios from 'axios';
 import { languagesList, bindingTypes } from '../data/dummyData';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc
+} from "firebase/firestore";
+
+import { db } from "../json_data/firebase";
+
+import { uploadImage } from "../json_data/cloudinary";
 
 const steps = [
   { id: 1, label: 'Basic Info', icon: MdInfo },
@@ -22,29 +32,46 @@ const AddBook = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [covers, setCovers] = useState({ cover1: null, cover2: null });
-  const [coverFiles, setCoverFiles] = useState({ cover1: null, cover2: null });
   const [authorsList, setAuthorsList] = useState([{ id: Date.now(), name: '' }]);
 
-  const handleImageUpload = (e, type) => {
+  const handleImageUpload = async (e, type) => {
     const file = e.target.files[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      Swal.fire('Error', 'Image size should be less than 2MB', 'error');
+      Swal.fire("Error", "Image size should be less than 2MB", "error");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setCoverFiles((prev) => ({ ...prev, [type]: file }));
-      setCovers((prev) => ({ ...prev, [type]: event.target.result }));
-    };
-    reader.readAsDataURL(file);
+    try {
+      // Local preview
+      const preview = URL.createObjectURL(file);
+
+      setCovers((prev) => ({
+        ...prev,
+        [type]: preview,
+      }));
+
+      // Upload to Cloudinary
+      const imageUrl = await uploadImage(file);
+
+      // Save Cloudinary URL directly
+      setCovers((prev) => ({
+        ...prev,
+        [type]: imageUrl,
+      }));
+
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Image upload failed", "error");
+    }
   };
 
   const removeImage = (type) => {
-    setCoverFiles((prev) => ({ ...prev, [type]: null }));
-    setCovers((prev) => ({ ...prev, [type]: null }));
+    setCovers((prev) => ({
+      ...prev,
+      [type]: null,
+    }));
   };
 
   const { register, handleSubmit, trigger, getValues, formState: { errors } } = useForm({
@@ -84,82 +111,144 @@ const AddBook = () => {
 
   // Helper logic to construct full book payload based on user inputs
   const buildBookPayload = async (data, explicitStatus = null) => {
-    let uploadedCover1 = covers.cover1 || 'https://placehold.co/400x600/EEE/31343C?text=No+Cover';
-    let uploadedCover2 = covers.cover2 || null;
 
-    if (coverFiles.cover1) {
-      const formData = new FormData();
-      formData.append('image', coverFiles.cover1);
-      const res = await axios.post('http://localhost:5000/api/upload/books', formData);
-      uploadedCover1 = res.data.url;
-    }
+    const uploadedCover1 = covers.cover1 || "";
+    const uploadedCover2 = covers.cover2 || "";
 
-    if (coverFiles.cover2) {
-      const formData = new FormData();
-      formData.append('image', coverFiles.cover2);
-      const res = await axios.post('http://localhost:5000/api/upload/books', formData);
-      uploadedCover2 = res.data.url;
-    }
+    // Upload to Cloudinary here if coverFiles exist
+    // uploadedCover1 = cloudinaryUrl1;
+    // uploadedCover2 = cloudinaryUrl2;
 
-    // Format all custom listed author names together separated with pipes (|)
     const formattedAuthors = authorsList
       .map(a => a.name.trim())
-      .filter(name => name !== "")
-      .join(' | ') || 'Unknown Author';
+      .filter(Boolean)
+      .join(" | ");
 
     return {
-      title: data.title || 'Untitled Book',
+      id: Date.now().toString(),
+
+      title: data.title || "",
       authors: formattedAuthors,
-      isbn: data.isbn || '',
-      edition: data.edition || '',
+
+      isbn: data.isbn || "",
+      edition: data.edition || "",
+
       ratings: Number(data.ratings) || 5,
-      flipkart: data.flipkart || '',
-      about: data.about || '',
-      price: data.price ? Number(data.price) : 0,
-      status: explicitStatus || data.status || 'In Stock',
-      weight: data.weight || '',
-      binding: data.binding || '',
-      dimensions: data.dimensions || '',
-      language: data.language || '',
-      format: data.format || '',
-      pages: data.pages ? Number(data.pages) : 0,
-      copyright: data.copyright || '',
+      flipkart: data.flipkart || "",
+      about: data.about || "",
+
+      price: Number(data.price) || 0,
+
+      status: explicitStatus || data.status || "In Stock",
+
+      weight: data.weight || "",
+      binding: data.binding || "",
+      dimensions: data.dimensions || "",
+      language: data.language || "",
+      format: data.format || "",
+
+      pages: Number(data.pages) || 0,
+
+      copyright: data.copyright || "",
+
       cover1: uploadedCover1,
       cover2: uploadedCover2
     };
   };
 
   const onSubmit = async (data) => {
+
     try {
+
       const newBook = await buildBookPayload(data);
-      await axios.post('http://localhost:5000/api/books', newBook);
+
+      await saveBook(newBook);
 
       await Swal.fire({
-        title: '🎉 Book Listing Created!',
-        text: `"${data.title}" has been added to the catalog successfully.`,
-        icon: 'success',
-        confirmButtonColor: '#2563EB',
-        confirmButtonText: 'View Book Store',
+        title: "🎉 Book Created!",
+        text: `"${newBook.title}" added successfully.`,
+        icon: "success"
       });
-      navigate('/admin/books');
-    } catch (error) {
-      console.error('Error saving book:', error);
-      Swal.fire('Error', 'Failed to save book configuration.', 'error');
+
+      navigate("/admin/books");
+
+    } catch (err) {
+
+      console.error(err);
+
+      Swal.fire(
+        "Error",
+        "Failed to save book.",
+        "error"
+      );
+
     }
+
+  };
+
+  const saveBook = async (book) => {
+
+    const snapshot = await getDocs(collection(db, "books (5)"));
+
+    let tableDocId = "";
+    let books = [];
+
+    snapshot.forEach((d) => {
+
+      const docData = d.data();
+
+      if (Array.isArray(docData.data)) {
+        tableDocId = d.id;
+        books = docData.data;
+      }
+
+    });
+
+    books.push(book);
+
+    await updateDoc(
+      doc(db, "books (5)", tableDocId),
+      {
+        data: books
+      }
+    );
+
   };
 
   const saveDraft = async () => {
-    try {
-      const data = getValues();
-      const draftBook = await buildBookPayload(data, 'Draft');
-      await axios.post('http://localhost:5000/api/books', draftBook);
 
-      await Swal.fire({ title: 'Draft Saved', text: 'Book saved as draft layout.', icon: 'info', timer: 1500, showConfirmButton: false });
-      navigate('/admin/books');
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      Swal.fire('Error', 'Failed to save product draft.', 'error');
+    try {
+
+      const data = getValues();
+
+      const draftBook = await buildBookPayload(
+        data,
+        "Draft"
+      );
+
+      await saveBook(draftBook);
+
+      Swal.fire({
+        title: "Draft Saved",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      navigate("/admin/books");
+
+    } catch (err) {
+
+      console.error(err);
+
+      Swal.fire(
+        "Error",
+        "Failed to save draft.",
+        "error"
+      );
+
     }
+
   };
 
   const stepVariants = {
