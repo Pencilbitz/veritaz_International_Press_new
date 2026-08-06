@@ -38,8 +38,8 @@ const AddBook = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      Swal.fire("Error", "Image size should be less than 2MB", "error");
+    if (file.size > 3 * 1024 * 1024) {
+      Swal.fire("Error", "Image size should be less than 3MB", "error");
       return;
     }
 
