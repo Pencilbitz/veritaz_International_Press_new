@@ -47,7 +47,6 @@ const EventDetails = () => {
   const [certificateUrl, setCertificateUrl] = useState("");
 
   const [posterFile, setPosterFile] = useState(null);
-  const [certificateFile, setCertificateFile] = useState(null);
 
   const { register, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: { status: 'Upcoming' },
@@ -128,16 +127,12 @@ const EventDetails = () => {
     try {
 
       let uploadedPosterUrl = posterUrl;
+      // Certificate is now a direct URL — no upload needed
       let uploadedCertificateUrl = certificateUrl;
 
       // Upload poster only if user selected a new one
       if (posterFile) {
         uploadedPosterUrl = await uploadImage(posterFile);
-      }
-
-      // Upload certificate only if user selected a new one
-      if (certificateFile) {
-        uploadedCertificateUrl = await uploadImage(certificateFile);
       }
 
       // Upload to Cloudinary here if posterFile exists
@@ -373,39 +368,24 @@ const EventDetails = () => {
             </div>
 
             <div>
-
-              <div>
-                <label className="label">Certificate</label>
-
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-
-                    if (!file) return;
-
-                    // Save file only
-                    setCertificateFile(file);
-
-                    // Preview image
-                    if (file.type.startsWith("image/")) {
-                      setCertificateUrl(URL.createObjectURL(file));
-                    }
-                  }}
-                />
-
-                {certificateUrl && (
-                  <a
-                    href={certificateUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    View Certificate
-                  </a>
-                )}
-              </div>
+              <label className="label">Certificate URL</label>
+              <input
+                type="url"
+                value={certificateUrl}
+                onChange={(e) => setCertificateUrl(e.target.value)}
+                className="input-field"
+                placeholder="https://..."
+              />
+              {certificateUrl && (
+                <a
+                  href={certificateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline text-sm mt-1 inline-block"
+                >
+                  View Certificate
+                </a>
+              )}
             </div>
 
             {/* Event Status */}

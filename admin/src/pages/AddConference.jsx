@@ -35,7 +35,7 @@ const AddConference = () => {
   const [globalExperts, setGlobalExperts] = useState([{ name: '', designation: '', institution: '', location: '', image: null }]);
 
   // ── Certificates Download ─────────────────────────────────────────
-  const [certificatesDownload, setCertificatesDownload] = useState([{ name: 'Track 01', file: null }]);
+  const [certificatesDownload, setCertificatesDownload] = useState([{ name: 'Track 01', file: '' }]);
 
   // ── Bank Details ──────────────────────────────────────────────────
   const [bankDetails, setBankDetails] = useState({
@@ -125,8 +125,8 @@ const AddConference = () => {
           );
           setCertificatesDownload(
             Array.isArray(conf.certificatesdownload)
-              ? conf.certificatesdownload
-              : [{ name: "Track 01", file: null, actualFile: null }]
+              ? conf.certificatesdownload.map(c => ({ name: c.name || '', file: c.file || '' }))
+              : [{ name: "Track 01", file: '' }]
           );
 
           if (conf.bankdetails) {
@@ -178,7 +178,7 @@ const AddConference = () => {
   const addGlobalExpert = () => setGlobalExperts([...globalExperts, { name: '', designation: '', institution: '', location: '', image: null, imageFile: null }]);
   const removeGlobalExpert = (index) => setGlobalExperts(globalExperts.filter((_, i) => i !== index));
 
-  const addCertificateTrack = () => setCertificatesDownload([...certificatesDownload, { name: `Track 0${certificatesDownload.length + 1}`, file: null, actualFile: null }]);
+  const addCertificateTrack = () => setCertificatesDownload([...certificatesDownload, { name: `Track 0${certificatesDownload.length + 1}`, file: '' }]);
   const removeCertificateTrack = (index) => setCertificatesDownload(certificatesDownload.filter((_, i) => i !== index));
 
   const handleUploadChange = (key, file, preview) => {
@@ -232,16 +232,8 @@ const AddConference = () => {
       const finalAdvisoryCommittee = await processArrayImages(advisoryCommittee);
       const finalGlobalExperts = await processArrayImages(globalExperts);
 
-      // 3. Upload certificate files
-      const finalCertificates = await Promise.all(certificatesDownload.map(async (item) => {
-        if (item.actualFile) {
-          const url = await uploadImage(item.actualFile);
-          const cleaned = { ...item, file: url };
-          delete cleaned.actualFile;
-          return cleaned;
-        }
-        return item;
-      }));
+      // 3. Certificates are now plain URLs — no upload needed
+      const finalCertificates = certificatesDownload.map(item => ({ name: item.name || '', file: item.file || '' }));
 
       // 4. Build complete structured payload
       const finalData = {
@@ -751,13 +743,13 @@ const AddConference = () => {
                   <input value={track.name || ''} onChange={e => handleComplexArrayChange(setCertificatesDownload, certificatesDownload, index, 'name', e.target.value)} className="input-field" />
                 </div>
                 <div className="w-full sm:w-1/2">
-                  <UploadBox
-                    label="Certificate (PDF)"
-                    onChange={(f, p) => {
-                      handleComplexArrayChange(setCertificatesDownload, certificatesDownload, index, 'file', p);
-                      handleComplexArrayChange(setCertificatesDownload, certificatesDownload, index, 'actualFile', f);
-                    }}
-                    value={track.file}
+                  <label className="label">Certificate URL</label>
+                  <input
+                    type="url"
+                    value={track.file || ''}
+                    onChange={e => handleComplexArrayChange(setCertificatesDownload, certificatesDownload, index, 'file', e.target.value)}
+                    className="input-field"
+                    placeholder="https://..."
                   />
                 </div>
               </div>
