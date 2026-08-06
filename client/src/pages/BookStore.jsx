@@ -86,7 +86,7 @@ export default function BookStore() {
           {filteredBooks.map((book) => (
             <Link
               key={book.id}
-              to={`/books/${book.id}`}
+              to={`/books/${book.title.replace(/\s+/g, '-').toLowerCase()}`}
               className="bg-white rounded-xl shadow border border-gray-100 p-4 hover:scale-105 transition"
             >
               {/* FIX 3: Changed book.cover to book.cover1 to match API structure */}

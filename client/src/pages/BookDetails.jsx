@@ -44,7 +44,7 @@ export default function BookDetails() {
 
         // Search by id (recommended)
         const bookData = books.find(
-          (book) => String(book.id) === String(slug)
+          (book) => book.title && book.title.replace(/\s+/g, '-').toLowerCase() === slug
         );
 
         // If your URL actually contains a slug instead of id, use this instead:
