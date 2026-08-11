@@ -91,9 +91,9 @@ export default function Navbar() {
                     </div>
 
                     <div>
-                        <h1 className="text-lg md:text-2xl font-bold tracking-widest text-gray-800 uppercase leading-none">
+                        <h2 className="text-lg md:text-2xl font-bold tracking-widest text-gray-800 uppercase leading-none">
                             Veritaz
-                        </h1>
+                        </h2>
 
                         <p className="text-[10px] md:text-[10px] tracking-[0.2em] text-gray-500 uppercase font-bold mt-0.5">
                             International Press
@@ -238,15 +238,19 @@ export default function Navbar() {
 
                             <div className="absolute left-0 mt-2 w-72 bg-white rounded-xl shadow-xl py-2 hidden group-hover:block border border-gray-100 animate-fadeIn">
                                 {conferences.length > 0 ? (
-                                    conferences.map((conf) => (
-                                        <Link
-                                            key={conf.id}
-                                            to={`/conferences/${conf.id}`}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                                        >
-                                            {conf.conferencename || conf.conferenceName || "Unnamed Conference"}
-                                        </Link>
-                                    ))
+                                    conferences.map((conf) => {
+                                        const confName = conf.conferencename || conf.conferenceName || "";
+                                        const confSlug = confName.replace(/\s+/g, "-").toLowerCase();
+                                        return (
+                                            <Link
+                                                key={conf.id}
+                                                to={`/conferences/${confSlug}`}
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                            >
+                                                {confName || "Unnamed Conference"}
+                                            </Link>
+                                        );
+                                    })
                                 ) : (
                                     <span className="block px-4 py-2 text-xs text-gray-400">No Released Conferences</span>
                                 )}
@@ -392,15 +396,19 @@ export default function Navbar() {
 
                             {isDropdownOpen && (
                                 <div className="bg-gray-50 py-2 pl-14">
-                                    {conferences.map((conf) => (
-                                        <a
-                                            key={conf.id}
-                                            href={`/conferences/${conf.id}`}
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md truncate"
-                                        >
-                                            {conf.conferenceName}
-                                        </a>
-                                    ))}
+                                    {conferences.map((conf) => {
+                                        const confName = conf.conferencename || conf.conferenceName || "";
+                                        const confSlug = confName.replace(/\s+/g, "-").toLowerCase();
+                                        return (
+                                            <a
+                                                key={conf.id}
+                                                href={`/conferences/${confSlug}`}
+                                                className="block px-4 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md truncate"
+                                            >
+                                                {confName}
+                                            </a>
+                                        );
+                                    })}
                                     {conferences.length === 0 && (
                                         <div className="px-4 py-2 text-sm text-gray-500">
                                             No conferences available

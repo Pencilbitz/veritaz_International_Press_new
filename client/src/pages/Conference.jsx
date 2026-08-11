@@ -5,7 +5,7 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../json_data/firebase";
 
 export default function Conference() {
-  const { id } = useParams();
+  const { confname } = useParams();
   const [conference, setConference] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -25,11 +25,12 @@ export default function Conference() {
         });
 
         console.log("All Conferences:", conferences);
-        console.log("URL id:", id);
+        console.log("URL confname:", confname);
 
-        const selectedConference = conferences.find(
-          item => String(item.id) === String(id)
-        );
+        const selectedConference = conferences.find((item) => {
+          const itemName = item.conferencename || item.conferenceName || "";
+          return itemName.replace(/\s+/g, "-").toLowerCase() === confname;
+        });
 
         console.log("Selected:", selectedConference);
 
@@ -76,9 +77,50 @@ export default function Conference() {
     };
 
     fetchConference();
-  }, [id]);
+  }, [confname]);
+
+  useEffect(() => {
+        document.title = "Conference Paper Listings";
+    
+        // 1. Meta Description
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+          metaDescription = document.createElement('meta');
+          metaDescription.name = "description";
+          document.head.appendChild(metaDescription);
+        }
+        metaDescription.content = "Explore academic conferences, research symposiums, and publishing workshops hosted by Veritaz International. Join scholarly discussions and events.";
+        
+        // 2. Meta Keywords
+        let metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (!metaKeywords) {
+          metaKeywords = document.createElement('meta');
+          metaKeywords.name = "keywords";
+          document.head.appendChild(metaKeywords);
+        }
+        metaKeywords.content = "Veritaz conferences, academic conferences India, research symposiums, publishing workshops, scholarly events, author seminars, academic webinars Veritaz";
+
+        // 3. Robots Tag
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (!metaRobots) {
+          metaRobots = document.createElement('meta');
+          metaRobots.name = "robots";
+          document.head.appendChild(metaRobots);
+        }
+        metaRobots.content = "index, follow";
+    
+        // 4. Canonical Link
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (!canonicalLink) {
+          canonicalLink = document.createElement('link');
+          canonicalLink.rel = "canonical";
+          document.head.appendChild(canonicalLink);
+        }
+        canonicalLink.href = "https://www.veritazinternational.com/conferences";
+      }, []);
 
   if (loading) {
+    
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <h2 className="text-xl font-bold text-blue-900 animate-pulse">Loading Conference Details...</h2>
@@ -427,7 +469,7 @@ export default function Conference() {
             <section className="container mx-auto mt-12">
               <div className="text-center mb-10">
                 <h2 className="text-blue-600 font-bold tracking-widest uppercase text-xs mb-2">Expert Insights</h2>
-                <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Keynote Speakers</h1>
+                <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Keynote Speakers</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -500,7 +542,7 @@ export default function Conference() {
             <section className="container mx-auto">
               <div className="text-center mb-10">
                 <h2 className="text-blue-600 font-bold tracking-widest uppercase text-xs mb-2">Advisory Committee</h2>
-                <h1 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Meet Our Global Experts</h1>
+                <h2 className="text-2xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Meet Our Global Experts</h2>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

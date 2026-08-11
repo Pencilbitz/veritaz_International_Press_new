@@ -30,7 +30,7 @@ function App() {
         />
         <Route path="/book-publishing" element={<BookPublishing />} />
         <Route path="/contact" element={<Contacts />} />
-        <Route path="/conferences/:id" element={<Conference />} />
+        <Route path="/conferences/:confname" element={<Conference />} />
       </Routes>
       <Footer />
     </>

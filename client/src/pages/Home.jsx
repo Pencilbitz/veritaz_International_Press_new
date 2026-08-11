@@ -116,6 +116,45 @@ export default function Home() {
         }, 300);
     };
 
+    useEffect(() => {
+        document.title = "Best Book Publication Company in India | Veritaz International";
+
+        // 1. Meta Description
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+            metaDescription = document.createElement('meta');
+            metaDescription.name = "description";
+            document.head.appendChild(metaDescription);
+        }
+        metaDescription.content = "Publish textbooks, research papers, patents, copyrights and academic journals with Veritaz International. Trusted publication experts across India.";
+
+        // 2. Meta Keywords
+        let metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (!metaKeywords) {
+            metaKeywords = document.createElement('meta');
+            metaKeywords.name = "keywords";
+            document.head.appendChild(metaKeywords);
+        }
+        metaKeywords.content = "Textbook Publishing India, Patent Filing Services, ISBN Registration, Copyright Services, Book Publishing Company, Veritaz International Press, Academic Publishing";
+        // 3. Robots Tag
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (!metaRobots) {
+            metaRobots = document.createElement('meta');
+            metaRobots.name = "robots";
+            document.head.appendChild(metaRobots);
+        }
+        metaRobots.content = "index, follow";
+
+        // 4. Canonical Link
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (!canonicalLink) {
+            canonicalLink = document.createElement('link');
+            canonicalLink.rel = "canonical";
+            document.head.appendChild(canonicalLink);
+        }
+        canonicalLink.href = "https://www.veritazinternational.com/";
+    }, []);
+
 
     return (
         <>
@@ -454,11 +493,11 @@ export default function Home() {
                                     </span>
                                 </div>
 
-                                <h1 className="text-xl md:text-3xl lg:text-5xl font-bold text-gray-900 mb-2 lg:mb-6 leading-tight">
+                                <h2 className="text-xl md:text-3xl lg:text-5xl font-bold text-gray-900 mb-2 lg:mb-6 leading-tight">
                                     Transform Your{" "}
                                     <span className="gradient-text">Knowledge</span>{" "}
                                     Into Impact
-                                </h1>
+                                </h2>
 
                                 <p className="text-sm md:text-xl lg:text-xl text-gray-600 mb-8 leading-relaxed">
                                     Veritaz International Press bridges the gap between innovative ideas and global recognition through comprehensive publishing, patent, and research solutions.

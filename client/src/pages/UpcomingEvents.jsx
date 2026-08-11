@@ -86,6 +86,46 @@ export default function UpcomingEvents() {
     );
   }
 
+  useEffect(() => {
+          document.title = "Academic Events & Conferences | Veritaz International";
+  
+          // 1. Meta Description
+          let metaDescription = document.querySelector('meta[name="description"]');
+          if (!metaDescription) {
+              metaDescription = document.createElement('meta');
+              metaDescription.name = "description";
+              document.head.appendChild(metaDescription);
+          }
+          metaDescription.content = "Explore Veritaz International's academic conferences, FDPs, workshops, seminars, and research events for students, researchers, faculty, and professionals.";
+  
+          // 2. Meta Keywords
+          let metaKeywords = document.querySelector('meta[name="keywords"]');
+          if (!metaKeywords) {
+              metaKeywords = document.createElement('meta');
+              metaKeywords.name = "keywords";
+              document.head.appendChild(metaKeywords);
+          }
+          metaKeywords.content = "academic events, publishing workshops, research conferences, author seminars, webinar schedule, Veritaz International events, scholarly workshops India";
+                  
+          // 3. Robots Tag
+          let metaRobots = document.querySelector('meta[name="robots"]');
+          if (!metaRobots) {
+              metaRobots = document.createElement('meta');
+              metaRobots.name = "robots";
+              document.head.appendChild(metaRobots);
+          }
+          metaRobots.content = "index, follow";
+  
+          // 4. Canonical Link
+          let canonicalLink = document.querySelector('link[rel="canonical"]');
+          if (!canonicalLink) {
+              canonicalLink = document.createElement('link');
+              canonicalLink.rel = "canonical";
+              document.head.appendChild(canonicalLink);
+          }
+          canonicalLink.href = "https://www.veritazinternational.com/upcoming-events";
+      }, []);
+
   return (
     <div className="text-gray-700 bg-[#f7f9fc]">
       {/* ================= HERO / EVENT DETAILS ================= */}

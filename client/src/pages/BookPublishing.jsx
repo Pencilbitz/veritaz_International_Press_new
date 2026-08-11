@@ -30,12 +30,52 @@ export default function BookPublishing() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    document.title = "Book Publishing Services in India | Veritaz International";
+
+    // 1. Meta Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content = "Publish your book with Veritaz International. We offer professional book publishing,ISBN ,editing,cover design,printing and global distribution services.";
+
+    // 2. Meta Keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.name = "keywords";
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.content = "book publishing services Veritaz, textbook publication India, academic book publishing, professional editing and ISBN, research paper and book publication, author publishing services";
+    
+    // 3. Robots Tag
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.name = "robots";
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.content = "index, follow";
+
+    // 4. Canonical Link
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = "canonical";
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.href = "https://www.veritazinternational.com/book-publishing";
+  }, []);
+
   return (
     <div ref={containerRef} className="bg-gray-50 font-sans min-h-screen">
 
       <div className="container mx-auto">
         {/* Hero Section */}
-        <section 
+        <section
           className="book-card text-white py-16 transition-all duration-300 hover:-translate-y-1"
           style={{ background: 'linear-gradient(132deg, rgb(0, 103, 154) 0.00%, rgb(0, 173, 239) 100.00%)' }}
         >
@@ -56,9 +96,9 @@ export default function BookPublishing() {
             <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Our Publication Services</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              
+
               {/* Fiction Novels Card */}
-              <div 
+              <div
                 className="book-card rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)' }}
               >
@@ -84,7 +124,7 @@ export default function BookPublishing() {
               </div>
 
               {/* Thesis Book Card */}
-              <div 
+              <div
                 className="book-card rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)' }}
               >
@@ -110,7 +150,7 @@ export default function BookPublishing() {
               </div>
 
               {/* Poetry Book Card */}
-              <div 
+              <div
                 className="book-card rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)' }}
               >
@@ -136,7 +176,7 @@ export default function BookPublishing() {
               </div>
 
               {/* Short Story Card */}
-              <div 
+              <div
                 className="book-card rounded-xl shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)' }}
               >
@@ -162,7 +202,7 @@ export default function BookPublishing() {
               </div>
 
               {/* Conference Proceedings Card */}
-              <div 
+              <div
                 className="book-card rounded-2xl shadow-xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #a6c0fe 0%, #f68084 100%)' }}
               >
@@ -190,7 +230,7 @@ export default function BookPublishing() {
               </div>
 
               {/* Edited Book Card */}
-              <div 
+              <div
                 className="book-card rounded-xl shadow-lg overflow-hidden md:col-span-2 lg:col-span-3 transition-all duration-300 hover:-translate-y-1"
                 style={{ background: 'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)' }}
               >
@@ -229,7 +269,7 @@ export default function BookPublishing() {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Our Publication Process</h2>
             <div className="flex flex-col md:flex-row justify-between items-center space-y-8 md:space-y-0 md:space-x-4">
-              
+
               <div className="text-center max-w-xs">
                 <div className="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-indigo-600 text-2xl font-bold">1</span>
@@ -267,7 +307,7 @@ export default function BookPublishing() {
         </section>
 
         {/* CTA Section */}
-        <section 
+        <section
           className="book-card py-16 text-white transition-all duration-300 hover:-translate-y-1"
           style={{ background: 'linear-gradient(132deg, rgb(0, 103, 154) 0.00%, rgb(0, 173, 239) 100.00%)' }}
         >

@@ -116,6 +116,46 @@ export default function Contacts() {
     }
   };
 
+  useEffect(() => {
+    document.title = "Contact Veritaz International | Book Publishing Experts";
+
+    // 1. Meta Description
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.name = "description";
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.content = "Contact Veritaz International for book publishing, ISBN registration, patent support, copyright services, research publication, and academic assistance.";
+
+    // 2. Meta Keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.name = "keywords";
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.content = "contact Veritaz International, publisher support, publishing inquiry, author help, academic publishing contact India, reach Veritaz team";
+    
+    // 3. Robots Tag
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.name = "robots";
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.content = "index, follow";
+
+    // 4. Canonical Link
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.rel = "canonical";
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.href = "https://www.veritazinternational.com/contact";
+  }, []);
+
   return (
     <div style={{ maxWidth: '1520px' }} className="container mx-auto bg-gray-50 font-sans">
 
@@ -407,7 +447,7 @@ export default function Contacts() {
                 {/* Dynamically Styled Response Message container */}
                 {formStatus.message && (
                   <p className={`text-center text-sm font-bold mt-4 p-3 rounded-xl ${formStatus.type === 'success' ? 'text-green-600 bg-green-50' :
-                      formStatus.type === 'loading' ? 'text-blue-600' : 'text-red-600 bg-red-50'
+                    formStatus.type === 'loading' ? 'text-blue-600' : 'text-red-600 bg-red-50'
                     }`}>
                     {formStatus.message}
                   </p>

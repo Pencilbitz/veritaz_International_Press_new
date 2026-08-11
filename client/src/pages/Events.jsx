@@ -42,6 +42,46 @@ export default function Events() {
     const upcomingEvents = events.filter(e => e.status !== "Completed");
     const completedEvents = events.filter(e => e.status === "Completed");
 
+    useEffect(() => {
+        document.title = "Academic Events & Conferences | Veritaz International";
+
+        // 1. Meta Description
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+            metaDescription = document.createElement('meta');
+            metaDescription.name = "description";
+            document.head.appendChild(metaDescription);
+        }
+        metaDescription.content = "Explore Veritaz International's academic conferences, FDPs, workshops, seminars, and research events for students, researchers, faculty, and professionals.";
+
+        // 2. Meta Keywords
+        let metaKeywords = document.querySelector('meta[name="keywords"]');
+        if (!metaKeywords) {
+            metaKeywords = document.createElement('meta');
+            metaKeywords.name = "keywords";
+            document.head.appendChild(metaKeywords);
+        }
+        metaKeywords.content = "academic events, publishing workshops, research conferences, author seminars, webinar schedule, Veritaz International events, scholarly workshops India";
+
+        // 3. Robots Tag
+        let metaRobots = document.querySelector('meta[name="robots"]');
+        if (!metaRobots) {
+            metaRobots = document.createElement('meta');
+            metaRobots.name = "robots";
+            document.head.appendChild(metaRobots);
+        }
+        metaRobots.content = "index, follow";
+
+        // 4. Canonical Link
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (!canonicalLink) {
+            canonicalLink = document.createElement('link');
+            canonicalLink.rel = "canonical";
+            document.head.appendChild(canonicalLink);
+        }
+        canonicalLink.href = "https://www.veritazinternational.com/events";
+    }, []);
+
     return (
         <div className="bg-gray-200 min-h-screen">
             {/* Contact Banner */}
@@ -77,9 +117,9 @@ export default function Events() {
             {/* Upcoming Events Slider */}
             <section className="max-w-7xl mx-auto px-4 py-12 relative">
                 <div className="text-center mb-12 pt-5">
-                    <h2 className="text-5xl font-bold text-gray-800 normal-case tracking-normal">
+                    <h1 className="text-5xl font-bold text-gray-800 normal-case tracking-normal">
                         Upcoming Events
-                    </h2>
+                    </h1>
                     <div className="w-24 h-1 bg-blue-600 rounded-full mx-auto mt-5"></div>
                 </div>
 
