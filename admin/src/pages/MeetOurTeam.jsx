@@ -23,7 +23,7 @@ import {
 import { db } from "../json_data/firebase";
 import { uploadImage } from "../json_data/cloudinary";
 
-const TEAM_DOC_ID = "uMoNnFpIO6K7JOXOHFfI";
+const TEAM_DOC_ID = "uMoNnFpI06K7JOX0HFfI";
 const MeetOurTeam = () => {
   const [activeTab, setActiveTab] = useState('inquiries');
 
