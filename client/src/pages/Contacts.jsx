@@ -254,16 +254,8 @@ export default function Contacts() {
                 return !isCoo && !isAsst;
               })
               .map((member) => (
-                <div key={member.id} className="bg-white rounded-tl-[60px] rounded-br-[60px] overflow-hidden shadow-lg border border-slate-100 flex flex-col h-full hover:shadow-2xl transition-all duration-300">
-                  <div className="h-72 overflow-hidden relative group shrink-0">
-                    <img
-                      src={member.photo ? (member.photo.startsWith('http') ? member.photo : `${member.photo}`) : 'https://placehold.co/400x400/EEE/31343C?text=Photo'}
-                      alt={member.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#3e7d89]/20 to-transparent pointer-events-none"></div>
-                  </div>
-                  <div className="p-6 flex-grow flex flex-col w-full bg-white relative z-10">
+                <div key={member.id} className="bg-white rounded-tl-[60px] rounded-br-[60px] overflow-hidden shadow-lg border border-slate-100 flex flex-col h-full min-h-[350px] hover:shadow-2xl transition-all duration-300">
+                  <div className="p-8 flex-grow flex flex-col justify-center w-full bg-white relative z-10">
                     <h3 className="text-xl font-bold text-slate-800 mb-1">{member.name}</h3>
                     <p className="text-[#3e7d89] text-xs font-bold uppercase tracking-widest">{member.designation}</p>
 
