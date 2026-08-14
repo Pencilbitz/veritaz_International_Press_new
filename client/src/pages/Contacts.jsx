@@ -243,55 +243,6 @@ export default function Contacts() {
         </div>
       </section>
 
-      {/* Main BD Team Grid Section */}
-      <section className="bg-[#f8fafc] py-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {teamMembers
-              .filter(m => {
-                const isCoo = m.designation?.toLowerCase().includes('chief operations officer') || m.name?.toLowerCase().includes('baskar');
-                const isAsst = m.designation?.toLowerCase().includes('assistant senior manager') || m.name?.toLowerCase().includes('logeshwari');
-                return !isCoo && !isAsst;
-              })
-              .map((member) => (
-                <div key={member.id} className="bg-white rounded-tl-[60px] rounded-br-[60px] overflow-hidden shadow-lg border border-slate-100 flex flex-col h-full min-h-[350px] hover:shadow-2xl transition-all duration-300">
-                  <div className="p-8 flex-grow flex flex-col justify-center w-full bg-white relative z-10">
-                    <h3 className="text-xl font-bold text-slate-800 mb-1">{member.name}</h3>
-                    <p className="text-[#3e7d89] text-xs font-bold uppercase tracking-widest">{member.designation}</p>
-
-                    <div className="space-y-2 mt-4 flex-grow">
-                      {member.phone && (
-                        <a href={`tel:${member.phone.replace(/[^+\d]/g, '')}`} className="flex items-center rounded-xl bg-slate-50 hover:bg-[#3e7d89] hover:text-white transition-colors p-2 group">
-                          <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-[#3e7d89]">
-                            <i className="fa-solid fa-phone text-sm"></i>
-                          </span>
-                          <span className="text-sm font-semibold ml-3">{member.phone}</span>
-                        </a>
-                      )}
-                      {member.email && (
-                        <a href={`mailto:${member.email}`} className="flex items-center rounded-xl bg-slate-50 hover:bg-[#3e7d89] hover:text-white transition-colors p-2 group">
-                          <span className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-[#3e7d89]">
-                            <i className="fa-solid fa-envelope text-sm"></i>
-                          </span>
-                          <span className="text-xs font-semibold truncate ml-3">{member.email}</span>
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-            {/* Join Our Team Card */}
-            <div className="bg-slate-100 rounded-tl-[60px] rounded-br-[60px] border-2 border-dashed border-slate-300 flex flex-col items-center justify-center p-8 text-center h-full min-h-[350px]">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
-                <i className="fa-solid fa-plus text-2xl"></i>
-              </div>
-              <p className="font-bold text-slate-400">Join our growing team</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Contact Section */}
       <section className="bg-slate-50 py-24 px-6 relative overflow-hidden font-sans">
         <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-[#3e7d89]/10 to-transparent pointer-events-none"></div>
