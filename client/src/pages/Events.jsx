@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Phone, MessageCircle } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { Link } from "react-router-dom";
@@ -84,36 +83,6 @@ export default function Events() {
 
     return (
         <div className="bg-gray-200 min-h-screen">
-            {/* Contact Banner */}
-            <section className="max-w-7xl mx-auto px-4 pt-8">
-                <div className="bg-green-50 border-l-4 border-blue-500 rounded-lg shadow-md p-6 max-w-4xl mx-auto mt-2">
-                    <h3 className="text-xl font-semibold text-center text-gray-800 mb-2">
-                        Organize Academic Events
-                    </h3>
-                    <p className="text-center text-lg text-gray-700 mb-4">
-                        For Faculty Development Programs, Workshops, and Webinars, please contact:
-                    </p>
-                    <div className="flex justify-center gap-6">
-                        <a
-                            href="tel:+919361313822"
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center w-max text-base font-normal"
-                        >
-                            <Phone size={18} className="mr-2" />
-                            +91 9600581734
-                        </a>
-                        <a
-                            href="https://wa.me/+919600581734"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition flex items-center text-base font-normal"
-                        >
-                            <MessageCircle size={18} className="mr-1" />
-                            WhatsApp
-                        </a>
-                    </div>
-                </div>
-            </section>
-
             {/* Upcoming Events Slider */}
             <section className="max-w-7xl mx-auto px-4 py-12 relative">
                 <div className="text-center mb-12 pt-5">
