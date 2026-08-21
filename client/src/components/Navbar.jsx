@@ -77,25 +77,25 @@ export default function Navbar() {
 
             {/* ================= TOP HEADER ================= */}
 
-            <div className="container mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+            <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 flex items-center justify-between gap-2">
 
                 {/* Logo */}
 
-                <div className="flex items-center gap-1">
-                    <div className="w-25 h-25 md:w-18 md:h-18">
+                <div className="flex items-center gap-1 min-w-0">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-18 md:h-18 flex-shrink-0">
                         <img
                             src="/assets/image/veritaz-bg-Remove.png"
                             alt="Veritaz"
-                            className="w-20 h-full object-contain"
+                            className="w-full h-full object-contain"
                         />
                     </div>
 
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-bold tracking-widest text-gray-800 uppercase leading-none">
+                    <div className="min-w-0">
+                        <h2 className="text-base sm:text-lg md:text-2xl font-bold tracking-wide md:tracking-widest text-gray-800 uppercase leading-none truncate">
                             Veritaz
                         </h2>
 
-                        <p className="text-[10px] md:text-[10px] tracking-[0.2em] text-gray-500 uppercase font-bold mt-0.5">
+                        <p className="text-[9px] sm:text-[10px] md:text-[10px] tracking-[0.1em] sm:tracking-[0.2em] text-gray-500 uppercase font-bold mt-0.5">
                             International Press
                         </p>
                     </div>
@@ -103,17 +103,17 @@ export default function Navbar() {
 
                 {/* Right Side */}
 
-                <div className="flex items-center gap-2 md:gap-6">
+                <div className="flex items-center gap-1.5 sm:gap-2 md:gap-6 flex-shrink-0">
 
                     {/* Mail */}
 
                     <a
                         href="mailto:veritazinternationalpress@gmail.com?subject=Enquiry%20from%20Website"
-                        className="flex items-center gap-3 px-4 py-2 border border-gray-200 rounded-full bg-white hover:bg-yellow-50 hover:border-yellow-500 hover:shadow-md transition-all group"
+                        className="flex items-center gap-0 sm:gap-3 px-2.5 sm:px-4 py-2 border border-gray-200 rounded-full bg-white hover:bg-yellow-50 hover:border-yellow-500 hover:shadow-md transition-all group"
                     >
                         <Mail className="w-5 h-5 text-yellow-500 group-hover:scale-110 transition-transform" />
 
-                        <div className="flex flex-col leading-tight">
+                        <div className="hidden sm:flex flex-col leading-tight">
                             <span className="font-bold text-[10px] tracking-wider text-gray-400">
                                 Send Mail
                             </span>
@@ -126,7 +126,7 @@ export default function Navbar() {
                         href="https://chat.whatsapp.com/Fc8Y3g9K43PBu6YhFv1JrA"
                         target="_blank"
                         rel="noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 border border-green-200 rounded-full bg-white hover:bg-green-50 hover:border-green-500 transition-all group"
+                        className="flex items-center gap-2 px-2.5 sm:px-3 py-2 border border-green-200 rounded-full bg-white hover:bg-green-50 hover:border-green-500 transition-all group"
                     >
                         <FaWhatsapp className="text-green-500 text-xl group-hover:scale-110 transition-transform" />
                         <span className="hidden sm:inline font-bold text-xs text-gray-700">
@@ -165,7 +165,8 @@ export default function Navbar() {
 
                     <button
                         onClick={openMenu}
-                        className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                        className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg flex-shrink-0"
+                        aria-label="Open menu"
                     >
                         <Menu className="w-7 h-7" />
                     </button>
@@ -236,24 +237,26 @@ export default function Navbar() {
 
                             </button>
 
-                            <div className="absolute left-0 mt-2 w-72 bg-white rounded-xl shadow-xl py-2 hidden group-hover:block border border-gray-100 animate-fadeIn">
-                                {conferences.length > 0 ? (
-                                    conferences.map((conf) => {
-                                        const confName = conf.conferencename || conf.conferenceName || "";
-                                        const confSlug = confName.replace(/\s+/g, "-").toLowerCase();
-                                        return (
-                                            <Link
-                                                key={conf.id}
-                                                to={`/conferences/${confSlug}`}
-                                                className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
-                                            >
-                                                {confName || "Unnamed Conference"}
-                                            </Link>
-                                        );
-                                    })
-                                ) : (
-                                    <span className="block px-4 py-2 text-xs text-gray-400">No Released Conferences</span>
-                                )}
+                            <div className="absolute left-0 pt-2 w-72 hidden group-hover:block z-50">
+                                <div className="bg-white rounded-xl shadow-xl py-2 border border-gray-100 animate-fadeIn">
+                                    {conferences.length > 0 ? (
+                                        conferences.map((conf) => {
+                                            const confName = conf.conferencename || conf.conferenceName || "";
+                                            const confSlug = confName.replace(/\s+/g, "-").toLowerCase();
+                                            return (
+                                                <Link
+                                                    key={conf.id}
+                                                    to={`/conferences/${confSlug}`}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                                >
+                                                    {confName || "Unnamed Conference"}
+                                                </Link>
+                                            );
+                                        })
+                                    ) : (
+                                        <span className="block px-4 py-2 text-xs text-gray-400">No Released Conferences</span>
+                                    )}
+                                </div>
                             </div>
 
                         </div>
@@ -303,6 +306,7 @@ export default function Navbar() {
                         <button
                             onClick={closeMenu}
                             className="p-2 text-gray-500 hover:bg-gray-100 rounded-full"
+                            aria-label="Close menu"
                         >
                             <X className="w-6 h-6" />
                         </button>

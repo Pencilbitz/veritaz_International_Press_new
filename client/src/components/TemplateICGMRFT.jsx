@@ -199,22 +199,24 @@ export default function TemplateICGMRFT({ conference }) {
             <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
               <span className="w-3 h-5 bg-yellow-500 rounded-sm"></span> Registration Fees (Per Paper)
             </h3>
-            <table className="w-full text-sm">
-              <thead className="border-b">
-                <tr>
-                  <th className="text-left pb-3 text-gray-500 font-semibold uppercase text-xs tracking-wider">Category</th>
-                  <th className="text-right pb-3 text-gray-500 font-semibold uppercase text-xs tracking-wider">Fee (INR)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {conference.fees && Object.entries(conference.fees).map(([cat, fee], idx) => (
-                  <tr key={idx}>
-                    <td className="py-4 font-medium text-gray-800 capitalize">{cat.replace(/([A-Z])/g, ' $1')}</td>
-                    <td className="py-4 text-right font-bold text-blue-700">₹ {fee}/-</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b">
+                  <tr>
+                    <th className="text-left pb-3 text-gray-500 font-semibold uppercase text-xs tracking-wider">Category</th>
+                    <th className="text-right pb-3 text-gray-500 font-semibold uppercase text-xs tracking-wider">Fee (INR)</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {conference.fees && Object.entries(conference.fees).map(([cat, fee], idx) => (
+                    <tr key={idx}>
+                      <td className="py-4 font-medium text-gray-800 capitalize">{cat.replace(/([A-Z])/g, ' $1')}</td>
+                      <td className="py-4 text-right font-bold text-blue-700">₹ {fee}/-</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           
           <div className="bg-blue-900 rounded-2xl shadow-sm p-8 text-white flex flex-col items-center justify-center">

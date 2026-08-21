@@ -224,7 +224,7 @@ const Testimonials = () => {
           <h1 className="text-xl font-bold text-brand-dark">Testimonials</h1>
           <p className="text-sm text-brand-gray">{filtered.length} testimonials</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {selected.length > 0 && (
             <motion.button
               initial={{ opacity: 0, scale: 0.9 }}
@@ -385,11 +385,11 @@ const Testimonials = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-brand-gray">
             Showing {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, filtered.length)} of {filtered.length}
           </p>
-          <div className="flex items-center gap-1">
+          <div className="flex flex-wrap items-center gap-1">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p} onClick={() => setPage(p)}

@@ -185,17 +185,17 @@ const Events = () => {
               <p className="text-sm text-gray-500">Manage all your academic events</p>
             </div>
           </div>
-          <div className="flex bg-gray-100 p-1 rounded-xl">
+          <div className="flex flex-wrap bg-gray-100 p-1 rounded-xl gap-1">
             <button
               onClick={() => { setActiveTab('events'); setSelectedIds([]); }}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'events' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${activeTab === 'events' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <MdEvent className="inline-block mr-2 text-lg" />
               Upcoming Events
             </button>
             <button
               onClick={() => { setActiveTab('completed'); setSelectedIds([]); }}
-              className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${activeTab === 'completed' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-300 whitespace-nowrap ${activeTab === 'completed' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
             >
               <MdEvent className="inline-block mr-2 text-lg" />
               Completed Events
@@ -203,8 +203,8 @@ const Events = () => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-blue-50 mb-6">
-          <div className="flex gap-4">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-blue-50 mb-6">
+          <div className="flex flex-wrap gap-3">
             <button onClick={() => navigate('/admin/import')} className="btn-outline flex items-center gap-2">
               <MdCloudUpload className="text-xl" /> Import JSON
             </button>
@@ -264,7 +264,6 @@ const Events = () => {
                       />
                     </td>
                     <td className="table-td">
-                      {console.log(evt.poster)}
                       {evt.poster
                         ? <img src={evt.poster} className="w-10 h-12 object-cover rounded-lg shadow-sm" alt={evt.eventTitle} onError={(e) => e.target.src = "https://placehold.co/150x150/EEE/31343C"} />
                         : <div className="w-10 h-12 rounded-lg bg-blue-50 flex items-center justify-center"><MdEvent className="text-blue-400" /></div>

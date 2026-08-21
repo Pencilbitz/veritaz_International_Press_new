@@ -485,7 +485,7 @@ export default function BookDetails() {
             <MdClose size={24} />
           </button>
           <img
-            src={getImageUrl(currentImage || book.cover1)}
+            src={currentImage || book.cover1}
             alt="Fullscreen preview"
             className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl"
           />
@@ -506,7 +506,7 @@ export default function BookDetails() {
 
             <div className="p-6">
               <div className="flex items-center gap-3 mb-6 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100/60">
-                <img src={getImageUrl(book.cover1)} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm bg-white" onError={(e) => { e.target.src = "https://placehold.co/50x70?text=No+Cover" }} />
+                <img src={book.cover1} alt={book.title} className="w-12 h-16 object-cover rounded shadow-sm bg-white" onError={(e) => { e.target.src = "https://placehold.co/50x70?text=No+Cover" }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-gray-800 truncate">{book.title}</p>
                   <p className="text-sm text-indigo-600 font-extrabold mt-0.5">₹{book.price}</p>

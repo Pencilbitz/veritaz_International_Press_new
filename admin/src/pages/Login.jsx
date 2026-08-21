@@ -40,13 +40,13 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
 
 
 
             <form
                 onSubmit={login}
-                className="bg-white shadow-lg rounded-xl p-8 w-96"
+                className="bg-white shadow-lg rounded-xl p-6 sm:p-8 w-full max-w-sm"
             >
                 <div className="flex flex-col items-center justify-center mb-8">
                     <img

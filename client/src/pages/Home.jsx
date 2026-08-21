@@ -171,7 +171,7 @@ export default function Home() {
                 <div className="flex flex-col lg:flex-row items-center justify-between">
 
                     <div className="w-full lg:w-1/2 space-y-4 text-center lg:text-left flex flex-col items-center lg:items-start">
-                        <h1 className="text-2xl sm:text-2xl md:text-5xl lg:text-4xl xl:text-6xl font-bold leading-tight text-gray-900">
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold leading-tight text-gray-900">
                             Best publishing <br className="hidden md:block" />
                             practices in <br className="hidden md:block" />
                             one book
@@ -507,7 +507,7 @@ export default function Home() {
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <a
                                         href="#publish-form"
-                                        className="px-4 py-2 bg-gradient-to-r from-veritaz-blue to-veritaz-purple text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover-lift flex items-center justify-center"
+                                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover-lift flex items-center justify-center"
                                     >
                                         <i className="fas fa-pen-nib mr-3"></i>
                                         Start Publishing Today
@@ -515,9 +515,9 @@ export default function Home() {
 
                                     <a
                                         href="contact.php"
-                                        className="px-4 py-2 bg-white text-gray-800 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-veritaz-blue transition-all duration-300 hover-lift flex items-center justify-center"
+                                        className="px-4 py-2 bg-white text-gray-800 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-blue-600 transition-all duration-300 hover-lift flex items-center justify-center"
                                     >
-                                        <i className="fas fa-phone mr-3 text-veritaz-blue"></i>
+                                        <i className="fas fa-phone mr-3 text-blue-600"></i>
                                         Contact Us
                                     </a>
                                 </div>
@@ -525,21 +525,21 @@ export default function Home() {
                                 {/* Stats */}
                                 <div className="mt-2 lg:mt-12 md:mt-8 grid grid-cols-3 gap-4">
                                     <div className="text-center">
-                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-veritaz-blue mb-2">
+                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-blue-600 mb-2">
                                             500+
                                         </div>
                                         <div className="text-gray-600 text-xs">Books Published</div>
                                     </div>
 
                                     <div className="text-center">
-                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-veritaz-orange mb-2">
+                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-orange-500 mb-2">
                                             200+
                                         </div>
                                         <div className="text-gray-600 text-xs">Patents Filed</div>
                                     </div>
 
                                     <div className="text-center">
-                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-veritaz-purple mb-2">
+                                        <div className="text-lg md:text-xl lg:text-3xl font-bold text-purple-600 mb-2">
                                             98%
                                         </div>
                                         <div className="text-gray-600 text-xs">Client Satisfaction</div>
@@ -553,7 +553,7 @@ export default function Home() {
                                     <div className="relative bg-white rounded-2xl shadow-2xl p-8 book-shadow transform transition-transform duration-500">
 
                                         {/* Badge */}
-                                        <div className="absolute -top-4 -right-4 w-16 h-16 bg-veritaz-orange rounded-full flex items-center justify-center text-white shadow-lg">
+                                        <div className="absolute -top-4 -right-4 w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-lg">
                                             <i className="fas fa-award text-2xl"></i>
                                         </div>
 
@@ -591,7 +591,7 @@ export default function Home() {
                                                     name="name"
                                                     placeholder="Your Name"
                                                     required
-                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-veritaz-blue bg-gray-50"
+                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                                                 />
                                             </div>
 
@@ -604,7 +604,7 @@ export default function Home() {
                                                     name="email"
                                                     placeholder="Email Address"
                                                     required
-                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-veritaz-blue bg-gray-50"
+                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                                                 />
                                             </div>
 
@@ -617,7 +617,7 @@ export default function Home() {
                                                     name="phone"
                                                     placeholder="Phone Number"
                                                     required
-                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-veritaz-blue bg-gray-50"
+                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                                                 />
                                             </div>
 
@@ -629,13 +629,13 @@ export default function Home() {
                                                     id="message"
                                                     name="message"
                                                     placeholder="Message"
-                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-veritaz-blue bg-gray-50"
+                                                    className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-50"
                                                 />
                                             </div>
 
                                             <button
                                                 type="submit"
-                                                className="w-full bg-gradient-to-r from-veritaz-orange to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
+                                                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold py-3 px-4 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center justify-center"
                                             >
                                                 <i className="fas fa-paper-plane mr-2"></i>
                                                 Send Inquiry

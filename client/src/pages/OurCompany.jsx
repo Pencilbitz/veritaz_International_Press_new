@@ -324,15 +324,15 @@ export default function OurCompany() {
 
                             {/* LEFT PREMIUM CIRCLE */}
 
-                            <div className="relative flex justify-center">
+                            <div className="relative flex justify-center px-8 sm:px-0">
 
                                 {/* Glow */}
 
-                                <div className="absolute w-72 h-72 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 blur-3xl opacity-20"></div>
+                                <div className="absolute w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 blur-3xl opacity-20"></div>
 
                                 {/* Outer Ring */}
 
-                                <div className="relative w-80 h-80 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-2xl">
+                                <div className="relative w-56 h-56 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-80 lg:h-80 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[2px] shadow-2xl">
 
                                     {/* Inner Ring */}
 

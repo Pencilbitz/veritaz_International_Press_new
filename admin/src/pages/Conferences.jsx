@@ -130,11 +130,11 @@ const Conferences = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <h1 className="text-xl font-bold flex items-center gap-2">
           <MdGroups className="text-blue-600" /> Conferences
         </h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button onClick={() => navigate('/admin/import')} className="btn-outline text-sm">
             <MdCloudUpload /> Import JSON
           </button>

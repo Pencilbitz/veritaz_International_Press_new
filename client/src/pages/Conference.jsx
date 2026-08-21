@@ -276,6 +276,7 @@ export default function Conference() {
                     <img
                       src={conference.poster}
                       alt="Conference Poster"
+                      className="w-full h-auto max-w-full object-contain rounded-2xl shadow-xl"
                       onError={(e) => {
                         e.currentTarget.closest(".lg\\:col-span-5")?.remove();
                       }}

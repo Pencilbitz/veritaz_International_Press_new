@@ -68,24 +68,6 @@ export default function UpcomingEvents() {
     fetchEvent();
   }, [eventId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <h2 className="text-xl font-bold text-gray-500 animate-pulse">Loading Event...</h2>
-      </div>
-    );
-  }
-
-  if (!event || event.message) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <h2 className="text-3xl font-bold text-red-500">
-          Event Not Found
-        </h2>
-      </div>
-    );
-  }
-
   useEffect(() => {
           document.title = "Academic Events & Conferences | Veritaz International";
   
@@ -125,6 +107,24 @@ export default function UpcomingEvents() {
           }
           canonicalLink.href = "https://www.veritazinternational.com/upcoming-events";
       }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-xl font-bold text-gray-500 animate-pulse">Loading Event...</h2>
+      </div>
+    );
+  }
+
+  if (!event || event.message) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <h2 className="text-3xl font-bold text-red-500">
+          Event Not Found
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div className="text-gray-700 bg-[#f7f9fc]">
