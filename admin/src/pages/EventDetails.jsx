@@ -233,7 +233,7 @@ const EventDetails = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/admin/events')}
@@ -292,8 +292,8 @@ const EventDetails = () => {
           <h3 className="section-title mb-4 pb-2 border-b border-blue-100">
             General Info
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
               <label className="label">College Name *</label>
               <input
                 {...register('collegeName')}
@@ -301,7 +301,7 @@ const EventDetails = () => {
                 placeholder="Enter college name"
               />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="label">Topic *</label>
               <input
                 {...register('topic')}
@@ -331,7 +331,7 @@ const EventDetails = () => {
                 />
               </div>
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="label">Location</label>
               <input
                 {...register('location')}
@@ -389,7 +389,7 @@ const EventDetails = () => {
             </div>
 
             {/* Event Status */}
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <label className="label mb-2 block">Event Status</label>
               <div className="flex gap-2">
                 <button

@@ -83,10 +83,12 @@
     }
   }
 
+
   .icon {
     margin-bottom: 16px;
     width: 22px;
     height: 22px;
+    color:aqua
   }
 
   @media (max-width: 1024px) {

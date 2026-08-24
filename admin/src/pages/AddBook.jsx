@@ -512,7 +512,7 @@ const AddBook = () => {
           </AnimatePresence>
 
           {/* Wizard Controls Footer */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-brand-border">
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-8 pt-6 border-t border-brand-border">
             <button
               type="button"
               onClick={prevStep}
@@ -521,7 +521,7 @@ const AddBook = () => {
             >
               <MdChevronLeft /> Previous
             </button>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button type="button" onClick={saveDraft} className="btn-secondary">
                 Save Draft
               </button>

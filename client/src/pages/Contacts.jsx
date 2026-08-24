@@ -171,7 +171,7 @@ export default function Contacts() {
             const coo = teamMembers.find(m => m.designation?.toLowerCase().includes('chief operations officer') || m.name?.toLowerCase().includes('baskar'));
             if (!coo) return null;
             return (
-              <div className="relative group overflow-hidden bg-white w-[350px] h-[500px] shadow-lg rounded-lg flex items-center justify-center">
+              <div className="relative group overflow-hidden bg-white w-full max-w-[350px] h-[420px] sm:h-[500px] shadow-lg rounded-lg flex items-center justify-center">
                 <img
                   src={coo.photo ? (coo.photo.startsWith('http') ? coo.photo : `${coo.photo}`) : 'https://placehold.co/400x500/EEE/31343C?text=Photo'}
                   alt={coo.name}
@@ -251,7 +251,7 @@ export default function Contacts() {
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-20">
             <span className="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-[#3e7d89] uppercase bg-[#3e7d89]/10 rounded-full">Contact Support</span>
-            <h1 class="text-4xl md:text-4xl font-black text-slate-900 mb-6 tracking-tight">Get In <span className="text-[#3e7d89]">Touch.</span></h1>
+            <h1 className="text-4xl md:text-4xl font-black text-slate-900 mb-6 tracking-tight">Get In <span className="text-[#3e7d89]">Touch.</span></h1>
             <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
               We'd love to hear from you. Send us a message and we'll respond as soon as possible.
             </p>

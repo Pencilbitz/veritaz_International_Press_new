@@ -98,7 +98,7 @@ const Navbar = ({ onMenuToggle }) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.95 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-card-xl border border-brand-border z-50"
+                className="fixed sm:absolute right-4 sm:right-0 top-[72px] sm:top-12 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-white rounded-2xl shadow-card-xl border border-brand-border z-50"
               >
                 <div className="p-4 border-b border-brand-border flex items-center justify-between">
                   <p className="font-semibold text-brand-dark">Notifications</p>
