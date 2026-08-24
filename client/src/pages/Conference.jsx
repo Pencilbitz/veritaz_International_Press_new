@@ -312,7 +312,7 @@ export default function Conference() {
                       </div>
                     </div>
                     <a href={conference.proceedingsdownload} download className="flex items-center justify-center py-2.5 bg-blue-600 border border-blue-600 rounded-xl text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-sm">
-                      📥 Download Book of Proceedings
+                      📥 Download Proceedings
                     </a>
                   </div>
                 </div>

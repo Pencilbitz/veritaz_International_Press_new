@@ -15,7 +15,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
-import { db } from "../json_data/firebase"; // your firebase config
+import { db } from "../json_data/firebase"; 
 import { uploadImage } from "../json_data/cloudinary";
 
 const AddConference = () => {
@@ -46,10 +46,9 @@ const AddConference = () => {
     ifscCode: ''
   });
 
-  // ── Uploads State ─────────────────────────────────────────────────
+  // ── Uploads State (Only file uploads remain here) ─────────────────
   const [uploads, setUploads] = useState({
     poster: null,
-    proceedingsDownload: null,
     brochureDownload: null
   });
 
@@ -91,6 +90,7 @@ const AddConference = () => {
             conferencevalidity: conf.conferencevalidity || "",
             registerlink: conf.registerlink || "",
             listenerparticipation: conf.listenerparticipation || "",
+            proceedingsdownload: conf.proceedingsdownload || "",
             feeAcademicians: conf.fees?.academicians || "",
             feeStudent: conf.fees?.student || "",
             feeResearchScholars: conf.fees?.researchScholars || "",
@@ -135,7 +135,6 @@ const AddConference = () => {
 
           setUploads({
             poster: conf.poster || null,
-            proceedingsDownload: conf.proceedingsdownload || null,
             brochureDownload: conf.brochuredownload || null,
           });
 
@@ -185,7 +184,6 @@ const AddConference = () => {
     setUploads(prev => ({ ...prev, [key]: { file, preview } }));
   };
 
-
   // ═════════════════════════════════════════════════════════════════
   //  SUBMIT & ERRORS HANDLER
   // ═════════════════════════════════════════════════════════════════
@@ -200,12 +198,12 @@ const AddConference = () => {
 
   const onSubmit = async (data) => {
     try {
-      // 1. Fixed Base Media File Resolution Logic
+      // 1. Media File Resolution Logic
       const uploadedFiles = {};
       for (const key of Object.keys(uploads)) {
         const item = uploads[key];
         if (item && item.file) {
-          uploadedFiles[key] = await uploadImage(item.file)
+          uploadedFiles[key] = await uploadImage(item.file);
         } else if (item && item.preview) {
           uploadedFiles[key] = item.preview;
         } else if (typeof item === 'string') {
@@ -232,7 +230,7 @@ const AddConference = () => {
       const finalAdvisoryCommittee = await processArrayImages(advisoryCommittee);
       const finalGlobalExperts = await processArrayImages(globalExperts);
 
-      // 3. Certificates are now plain URLs — no upload needed
+      // 3. Certificates
       const finalCertificates = certificatesDownload.map(item => ({ name: item.name || '', file: item.file || '' }));
 
       // 4. Build complete structured payload
@@ -249,7 +247,7 @@ const AddConference = () => {
         listenerparticipation: data.listenerparticipation || null,
         poster: uploadedFiles.poster || null,
         brochuredownload: uploadedFiles.brochureDownload || null,
-        proceedingsdownload: uploadedFiles.proceedingsDownload || null,
+        proceedingsdownload: data.proceedingsdownload || null, // Direct URL string
         dates: {
           abstractSubmission: data.abstractSubmission || null,
           fullPaperSubmission: data.fullPaperSubmission || null,
@@ -270,7 +268,7 @@ const AddConference = () => {
         certificatesdownload: finalCertificates.filter(c => c.file).length ? finalCertificates.filter(c => c.file) : []
       };
 
-      // 5. Save to Firestore (Edit existing vs Create new)
+      // 5. Save to Firestore
       const snapshot = await getDocs(collection(db, "conferences (2)"));
 
       let tableDocId = null;
@@ -285,7 +283,6 @@ const AddConference = () => {
       });
 
       if (isEdit) {
-        // Update only the conference that matches the URL id
         const index = updatedArray.findIndex((c) => String(c.id) === String(id));
 
         if (index === -1) {
@@ -295,7 +292,6 @@ const AddConference = () => {
         finalData.id = id;
         updatedArray[index] = finalData;
       } else {
-        // Add: give the new conference its own unique id and append it
         finalData.id =
           typeof crypto !== "undefined" && crypto.randomUUID
             ? crypto.randomUUID()
@@ -434,7 +430,6 @@ const AddConference = () => {
               <label className="label">Conference Security</label>
               <select {...register('conferencesecurity')} className="input-field">
                 <option value="">Select Security Level</option>
-                <option value="Public">Verified Document</option>
                 <option value="Public">Public</option>
                 <option value="Private">Private</option>
               </select>
@@ -446,10 +441,10 @@ const AddConference = () => {
           </div>
         </div>
 
-        {/* --- Registration Links --- */}
+        {/* --- Registration & External Links --- */}
         <div className="card p-6">
-          <h2 className="section-title mb-5">Registration & Participation</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <h2 className="section-title mb-5">Links & Downloads</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <div>
               <label className="label">Register Link</label>
               <input {...register('registerlink')} className="input-field" placeholder="https://..." />
@@ -457,6 +452,15 @@ const AddConference = () => {
             <div>
               <label className="label">Listener Participation Link</label>
               <input {...register('listenerparticipation')} className="input-field" placeholder="https://..." />
+            </div>
+            <div>
+              <label className="label">Proceedings Link / URL</label>
+              <input
+                type="url"
+                {...register('proceedingsdownload')}
+                className="input-field"
+                placeholder="https://drive.google.com/..."
+              />
             </div>
           </div>
         </div>
@@ -760,16 +764,11 @@ const AddConference = () => {
         {/* --- Media & Files --- */}
         <div className="card p-6">
           <h2 className="section-title mb-5">Media & Files</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <UploadBox
               label="Poster / Main Banner Image"
               onChange={(f, p) => handleUploadChange('poster', f, p)}
               value={uploads.poster ? (uploads.poster.preview || uploads.poster) : null}
-            />
-            <UploadBox
-              label="Proceedings Download (PDF)"
-              onChange={(f, p) => handleUploadChange('proceedingsDownload', f, p)}
-              value={uploads.proceedingsDownload ? (uploads.proceedingsDownload.preview || uploads.proceedingsDownload) : null}
             />
             <UploadBox
               label="Brochure Download (PDF)"
