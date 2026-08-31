@@ -11,18 +11,17 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../json_data/firebase";
 
 export default function BookDetails() {
-  const { slug } = useParams(); // Maps to the API's book ID
+  const { slug } = useParams(); // Maps to the unique book title-id slug[cite: 3]
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // States for dynamic functionality
+  // States for dynamic functionality[cite: 3]
   const [currentImage, setCurrentImage] = useState("");
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -42,13 +41,27 @@ export default function BookDetails() {
         console.log("All Books:", books);
         console.log("URL Param:", slug);
 
-        // Search by id (recommended)
-        const bookData = books.find(
-          (book) => book.title && book.title.replace(/\s+/g, '-').toLowerCase() === slug
-        );
+        // Find book by title-id slug (with fallback to ID direct match)[cite: 3]
+        const targetId = slug ? slug.split('-').pop() : null;
 
-        // If your URL actually contains a slug instead of id, use this instead:
-        // const bookData = books.find(book => book.slug === slug);
+        const bookData = books.find((b) => {
+          if (!b) return false;
+
+          // Check combined formatted title + id
+          if (b.title && b.id !== undefined) {
+            const generatedSlug = `${b.title.replace(/\s+/g, '-').toLowerCase()}-${b.id}`;
+            if (generatedSlug === slug?.toLowerCase()) {
+              return true;
+            }
+          }
+
+          // Fallback check by direct ID matching
+          if (b.id !== undefined && String(b.id) === targetId) {
+            return true;
+          }
+
+          return false;
+        });
 
         console.log("Selected Book:", bookData);
 
@@ -109,7 +122,7 @@ export default function BookDetails() {
     canonicalLink.href = "https://www.veritazinternational.com/books";
   }, []);
 
-  // Form states for checkout flow
+  // Form states for checkout flow[cite: 3]
   const [custName, setCustName] = useState("");
   const [custLocation, setCustLocation] = useState("");
   const [custQty, setCustQty] = useState("1");
@@ -117,7 +130,7 @@ export default function BookDetails() {
   if (loading) return <div className="p-8 text-center text-gray-500">Loading...</div>;
   if (error || !book) return <div className="p-8 text-center text-red-500">{error || 'Book not found'}</div>;
 
-  // Modern Native Share handler
+  // Modern Native Share handler[cite: 3]
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -135,7 +148,7 @@ export default function BookDetails() {
     }
   };
 
-  // WhatsApp checkout message generator
+  // WhatsApp checkout message generator[cite: 3]
   const handleWhatsAppSubmit = (e) => {
     e.preventDefault();
     const adminPhoneNumber = "919042007413";
@@ -156,14 +169,14 @@ export default function BookDetails() {
     setIsOrderModalOpen(false);
   };
 
-
-
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8 pb-12">
         {/* Breadcrumbs */}
         <div className="flex items-center gap-2 text-xs font-medium text-gray-500 mb-6">
-          <Link to="/books" className="hover:text-blue-600 transition-colors text-blue-600">Book Store</Link>
+          <Link to="/book-store" className="hover:text-blue-600 transition-colors text-blue-600">
+            Book Store
+          </Link>
           <span>&gt;</span>
           <span className="text-blue-800">{book.title}</span>
         </div>
@@ -184,14 +197,12 @@ export default function BookDetails() {
 
               {/* Image Previews */}
               <div className="flex items-center justify-center gap-3 mb-6">
-                {/* FIX 2: Updated references from book.cover to book.cover1 */}
                 <div
                   className={`w-16 h-20 rounded border-2 overflow-hidden shadow-md cursor-pointer bg-white ${currentImage === book.cover1 ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setCurrentImage(book.cover1)}
                 >
                   <img src={book.cover1} alt="Front Cover" className="w-full h-full object-cover" />
                 </div>
-                {/* FIX 3: Updated reference from book.backCover to book.cover2 */}
                 <div
                   className={`w-16 h-20 rounded border-2 overflow-hidden shadow-md cursor-pointer bg-white ${currentImage === book.cover2 ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setCurrentImage(book.cover2 || book.cover1)}
@@ -248,7 +259,6 @@ export default function BookDetails() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Authors</p>
-                    {/* FIX 4: Corrected property from book.author to book.authors */}
                     {book.authors ? book.authors.split(',').map((auth, idx) => (
                       <p key={idx} className="text-sm font-semibold text-gray-800 mb-1">{auth.trim()}</p>
                     )) : (
@@ -285,7 +295,6 @@ export default function BookDetails() {
               <div className="flex items-center flex-wrap gap-4 py-3 px-4 border border-gray-200 rounded-xl mb-6">
                 <div className="flex items-center gap-1.5">
                   <div className="flex items-center text-yellow-400">
-                    {/* Render rating icons dynamically or fallback */}
                     {[...Array(5)].map((_, i) => (
                       <MdStar key={i} className={i < (book.ratings || 5) ? "text-yellow-400" : "text-yellow-400/50"} />
                     ))}
@@ -300,6 +309,7 @@ export default function BookDetails() {
                   <span className="text-gray-500">views</span>
                 </div>
               </div>
+
               {/* Flipkart Link */}
               {book.flipkart && (
                 <div className="mb-6">
@@ -319,7 +329,6 @@ export default function BookDetails() {
                 </div>
               )}
 
-
               {/* About this Book */}
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-3">
@@ -330,7 +339,6 @@ export default function BookDetails() {
                 </div>
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
-                    {/* FIX 5: Fallback to your API field named "about" */}
                     {book.about || book.features || book.description || 'No description provided for this book.'}
                   </p>
                 </div>
