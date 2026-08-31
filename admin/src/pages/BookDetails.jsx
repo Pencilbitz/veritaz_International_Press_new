@@ -31,6 +31,7 @@ const BookDetails = () => {
     ratings: 5,
     about: "",
     flipkart: "",
+    amazon: "",
     price: "",
     status: "In Stock",
     weight: "",
@@ -78,6 +79,7 @@ const BookDetails = () => {
           ratings: book.ratings || 5,
           about: book.about || "",
           flipkart: book.flipkart || "",
+          amazon: book.amazon || "",
           price: book.price || "",
           status: book.status || "In Stock",
           weight: book.weight || "",
@@ -318,7 +320,7 @@ const BookDetails = () => {
                 </div>
               </div>
 
-              {/* About long text block */}
+              {/* About long text block & Market Links */}
               <div className="mb-6">
                 <label className="block text-xs font-bold text-gray-600 uppercase mb-1">About This Book</label>
                 <textarea
@@ -330,18 +332,34 @@ const BookDetails = () => {
                   placeholder="Provide book features or summaries description..."
                 />
 
-                <div className="mt-4">
-                  <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
-                    Flipkart Link
-                  </label>
-                  <input
-                    type="url"
-                    name="flipkart"
-                    value={formData.flipkart}
-                    onChange={handleChange}
-                    className="w-full text-sm p-3 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                    placeholder="https://www.flipkart.com/your-book"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
+                      Flipkart Link
+                    </label>
+                    <input
+                      type="url"
+                      name="flipkart"
+                      value={formData.flipkart}
+                      onChange={handleChange}
+                      className="w-full text-sm p-3 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      placeholder="https://www.flipkart.com/your-book"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 uppercase mb-1">
+                      Amazon Link
+                    </label>
+                    <input
+                      type="url"
+                      name="amazon"
+                      value={formData.amazon}
+                      onChange={handleChange}
+                      className="w-full text-sm p-3 border border-gray-300 rounded outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      placeholder="https://www.amazon.in/your-book"
+                    />
+                  </div>
                 </div>
               </div>
 

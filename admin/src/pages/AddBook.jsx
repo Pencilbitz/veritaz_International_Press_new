@@ -82,6 +82,7 @@ const AddBook = () => {
       edition: '1st Edition',
       ratings: 4.5,
       flipkart: '',
+      amazon: '',
       price: '',
       status: 'In Stock',
       weight: '180g',
@@ -96,7 +97,7 @@ const AddBook = () => {
   });
 
   const stepFields = {
-    1: ['title', 'isbn', 'edition', 'price', 'status', 'ratings', 'flipkart'],
+    1: ['title', 'isbn', 'edition', 'price', 'status', 'ratings', 'flipkart', 'amazon'],
     2: [],
     3: ['about'],
     4: ['language', 'binding', 'pages', 'dimensions', 'weight', 'format', 'copyright'],
@@ -115,10 +116,6 @@ const AddBook = () => {
     const uploadedCover1 = covers.cover1 || "";
     const uploadedCover2 = covers.cover2 || "";
 
-    // Upload to Cloudinary here if coverFiles exist
-    // uploadedCover1 = cloudinaryUrl1;
-    // uploadedCover2 = cloudinaryUrl2;
-
     const formattedAuthors = authorsList
       .map(a => a.name.trim())
       .filter(Boolean)
@@ -135,6 +132,7 @@ const AddBook = () => {
 
       ratings: Number(data.ratings) || 5,
       flipkart: data.flipkart || "",
+      amazon: data.amazon || "",
       about: data.about || "",
 
       price: Number(data.price) || 0,
@@ -386,17 +384,28 @@ const AddBook = () => {
                     </select>
                   </div>
 
-                  <div>
-                    <label className="label">Product Initial Rating (1-5)</label>
-                    <input {...register('ratings')} type="number" min="1" max="5" className="input-field" />
-                  </div>
                   <div className="sm:col-span-2">
+                    <label className="label">Product Initial Rating (1-5)</label>
+                    <input {...register('ratings')} type="number" min="1" max="5" step="0.1" className="input-field" />
+                  </div>
+
+                  <div>
                     <label className="label">Flipkart Link</label>
                     <input
                       {...register('flipkart')}
                       type="url"
                       className="input-field"
                       placeholder="https://www.flipkart.com/..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="label">Amazon Link</label>
+                    <input
+                      {...register('amazon')}
+                      type="url"
+                      className="input-field"
+                      placeholder="https://www.amazon.in/..."
                     />
                   </div>
                 </div>
