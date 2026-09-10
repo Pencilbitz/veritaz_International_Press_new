@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 export default function Conference() {
   const { confname } = useParams();
@@ -12,17 +11,13 @@ export default function Conference() {
   useEffect(() => {
     const fetchConference = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "conferences (2)"));
+        const { data, error } = await supabase
+          .from("veritaz_conferences")
+          .select("*");
 
-        const conferences = [];
+        if (error) throw error;
 
-        snapshot.forEach((doc) => {
-          const docData = doc.data();
-
-          if (Array.isArray(docData.data)) {
-            conferences.push(...docData.data);
-          }
-        });
+        const conferences = data || [];
 
         console.log("All Conferences:", conferences);
         console.log("URL confname:", confname);

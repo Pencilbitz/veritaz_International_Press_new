@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 export default function Contacts() {
   // Form submission state
@@ -10,21 +9,15 @@ export default function Contacts() {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "team_contacts"));
+        const { data, error } = await supabase
+          .from("veritaz_team_contacts")
+          .select("*")
+          .order("id", { ascending: true });
 
-        let members = [];
+        if (error) throw error;
 
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-
-          // If the document contains an array called "data"
-          if (Array.isArray(data.data)) {
-            members = [...members, ...data.data];
-          }
-        });
-
-        console.log(members);
-        setTeamMembers(members);
+        console.log(data);
+        setTeamMembers(data || []);
       } catch (err) {
         console.error("Error fetching contacts:", err);
       }
@@ -83,20 +76,13 @@ export default function Contacts() {
       email: formData.get('email'),
       phone: formData.get('phone'),
       message: formData.get('message'),
-      formType: 'Contact Us'
+      form_type: 'Contact Us'
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/inquiries", {
-        method: "POST",
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-      const data = await response.json();
+      const { error } = await supabase.from("veritaz_inquiries").insert(payload);
 
-      if (response.ok) {
+      if (!error) {
         setFormStatus({
           message: "✅ Success! We'll be in touch within 24 hours.",
           type: 'success'
@@ -104,7 +90,7 @@ export default function Contacts() {
         form.reset();
       } else {
         setFormStatus({
-          message: "❌ " + (data.message || "Submission failed."),
+          message: "❌ " + (error.message || "Submission failed."),
           type: 'error'
         });
       }

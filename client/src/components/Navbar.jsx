@@ -13,8 +13,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 import {
   FaLinkedinIn,
@@ -43,21 +42,15 @@ export default function Navbar() {
     useEffect(() => {
   const fetchConferences = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "conferences (2)"));
+      const { data, error } = await supabase
+        .from("veritaz_conferences")
+        .select("*");
 
-      let conferences = [];
+      if (error) throw error;
 
-      snapshot.forEach((doc) => {
-        const docData = doc.data();
+      console.log("Conferences:", data);
 
-        if (Array.isArray(docData.data)) {
-          conferences.push(...docData.data);
-        }
-      });
-
-      console.log("Conferences:", conferences);
-
-      setConferences(conferences);
+      setConferences(data || []);
     } catch (error) {
       console.error("Failed to fetch conferences:", error);
       setConferences([]);

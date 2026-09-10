@@ -6,17 +6,8 @@ import { MdArrowBack, MdSave, MdAdd, MdRemoveCircle } from 'react-icons/md';
 import UploadBox from '../components/UploadBox';
 import axios from 'axios';
 
-import {
-  collection,
-  addDoc,
-  doc,
-  getDocs,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase"; 
-import { uploadImage } from "../json_data/cloudinary";
+import { supabase } from "../lib/supabase";
+import { uploadImage } from "../lib/storage";
 
 const AddConference = () => {
   const { id } = useParams();
@@ -59,17 +50,13 @@ const AddConference = () => {
     if (isEdit) {
       const fetchConference = async () => {
         try {
-          const snapshot = await getDocs(collection(db, "conferences (2)"));
+          const { data: conf, error: sbError } = await supabase
+            .from("veritaz_conferences")
+            .select("*")
+            .eq("id", String(id))
+            .maybeSingle();
 
-          let conf = null;
-
-          snapshot.forEach((d) => {
-            const raw = d.data();
-            if (Array.isArray(raw.data)) {
-              const match = raw.data.find((c) => String(c.id) === String(id));
-              if (match) conf = match;
-            }
-          });
+          if (sbError) throw sbError;
 
           if (!conf) {
             Swal.fire("Error", "Conference not found", "error");
@@ -268,44 +255,26 @@ const AddConference = () => {
         certificatesdownload: finalCertificates.filter(c => c.file).length ? finalCertificates.filter(c => c.file) : []
       };
 
-      // 5. Save to Firestore
-      const snapshot = await getDocs(collection(db, "conferences (2)"));
-
-      let tableDocId = null;
-      let updatedArray = [];
-
-      snapshot.forEach((d) => {
-        const raw = d.data();
-        if (Array.isArray(raw.data)) {
-          tableDocId = d.id;
-          updatedArray = [...raw.data];
-        }
-      });
-
+      // 5. Save to Supabase
       if (isEdit) {
-        const index = updatedArray.findIndex((c) => String(c.id) === String(id));
+        const { error } = await supabase
+          .from("veritaz_conferences")
+          .update(finalData)
+          .eq("id", String(id));
 
-        if (index === -1) {
-          throw new Error("Conference not found for editing.");
-        }
-
-        finalData.id = id;
-        updatedArray[index] = finalData;
+        if (error) throw error;
       } else {
         finalData.id =
           typeof crypto !== "undefined" && crypto.randomUUID
             ? crypto.randomUUID()
             : Date.now().toString();
-        updatedArray.push(finalData);
-      }
 
-      if (!tableDocId) {
-        throw new Error("Conference table document not found.");
-      }
+        const { error } = await supabase
+          .from("veritaz_conferences")
+          .insert(finalData);
 
-      await updateDoc(doc(db, "conferences (2)", tableDocId), {
-        data: updatedArray,
-      });
+        if (error) throw error;
+      }
 
       Swal.fire({
         title: "Success!",

@@ -1,11 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-    signInWithEmailAndPassword,
-    setPersistence,
-    browserLocalPersistence,
-} from "firebase/auth";
-import { auth } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 import { motion, AnimatePresence } from 'framer-motion';
 
 
@@ -23,13 +18,12 @@ export default function Login() {
         try {
             setLoading(true);
 
-            await setPersistence(auth, browserLocalPersistence);
-
-            await signInWithEmailAndPassword(
-                auth,
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
-                password
-            );
+                password,
+            });
+
+            if (error) throw error;
 
             navigate("/admin");
         } catch (err) {

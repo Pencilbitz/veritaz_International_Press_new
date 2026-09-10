@@ -1,0 +1,32 @@
+{
+  "books": {
+    "firebaseRows": 119,
+    "count": 119,
+    "error": null
+  },
+  "conferences": {
+    "firebaseRows": 4,
+    "count": 4,
+    "error": null
+  },
+  "events": {
+    "firebaseRows": 40,
+    "count": 40,
+    "error": null
+  },
+  "testimonials": {
+    "firebaseRows": 5,
+    "count": 5,
+    "error": null
+  },
+  "team_contacts": {
+    "firebaseRows": 5,
+    "count": 5,
+    "error": null
+  },
+  "inquiries": {
+    "firebaseRows": 0,
+    "count": 0,
+    "error": null
+  }
+}

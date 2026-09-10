@@ -15,8 +15,7 @@ import StatsCard from '../components/StatsCard';
 
 import axios from 'axios';
 
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase, EVENT_SELECT } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
 
@@ -104,20 +103,10 @@ useEffect(() => {
   fetchDashboardData();
 }, []);
 
-const fetchCollectionData = async (collectionName) => {
-  const snapshot = await getDocs(collection(db, collectionName));
-
-  let data = [];
-
-  snapshot.forEach((doc) => {
-    const docData = doc.data();
-
-    if (Array.isArray(docData.data)) {
-      data.push(...docData.data);
-    }
-  });
-
-  return data;
+const fetchCollectionData = async (table, select = "*") => {
+  const { data, error } = await supabase.from(table).select(select);
+  if (error) throw error;
+  return data || [];
 };
 
 const fetchDashboardData = async () => {
@@ -128,10 +117,10 @@ const fetchDashboardData = async () => {
       conferences,
       testimonials
     ] = await Promise.all([
-      fetchCollectionData("books (5)"),
-      fetchCollectionData("events (2)"),
-      fetchCollectionData("conferences (2)"),
-      fetchCollectionData("testimonials")
+      fetchCollectionData("veritaz_books"),
+      fetchCollectionData("veritaz_events", EVENT_SELECT),
+      fetchCollectionData("veritaz_conferences"),
+      fetchCollectionData("veritaz_testimonials")
     ]);
 
     console.log("Books:", books);

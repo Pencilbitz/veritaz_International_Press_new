@@ -3,14 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { MdGroups, MdAdd, MdEdit, MdDelete, MdSearch, MdCloudUpload } from 'react-icons/md';
 import axios from 'axios';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 // Handles both legacy records where `dates` was saved as a JSON string,
 // and current records where `dates` is already a plain object.
@@ -44,19 +37,13 @@ const Conferences = () => {
 
   const fetchConferences = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "conferences (2)"));
+      const { data, error } = await supabase
+        .from("veritaz_conferences")
+        .select("*");
 
-      let allConferences = [];
+      if (error) throw error;
 
-      snapshot.forEach((d) => {
-        const data = d.data();
-
-        if (Array.isArray(data.data)) {
-          allConferences.push(...data.data);
-        }
-      });
-
-      setConferences(allConferences);
+      setConferences(data || []);
     } catch (error) {
       console.error("Error fetching conferences:", error);
     }
@@ -76,32 +63,16 @@ const Conferences = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const snapshot = await getDocs(collection(db, "conferences (2)"));
+      const { error } = await supabase
+        .from("veritaz_conferences")
+        .delete()
+        .eq("id", String(id));
 
-      let tableDocId = "";
-      let conferenceArray = [];
+      if (error) throw error;
 
-      snapshot.forEach((d) => {
-        const data = d.data();
-
-        if (Array.isArray(data.data)) {
-          tableDocId = d.id;
-          conferenceArray = data.data;
-        }
-      });
-
-      conferenceArray = conferenceArray.filter(
-        (conf) => String(conf.id) !== String(id)
+      setConferences((prev) =>
+        prev.filter((conf) => String(conf.id) !== String(id))
       );
-
-      await updateDoc(
-        doc(db, "conferences (2)", tableDocId),
-        {
-          data: conferenceArray,
-        }
-      );
-
-      setConferences(conferenceArray);
 
       Swal.fire(
         "Deleted!",

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 export default function Home() {
 
@@ -33,20 +32,14 @@ export default function Home() {
     useEffect(() => {
         const fetchTestimonials = async () => {
             try {
-                const snapshot = await getDocs(collection(db, "testimonials"));
+                const { data, error } = await supabase
+                    .from("veritaz_testimonials")
+                    .select("*")
+                    .order("id", { ascending: true });
 
-                const docs = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
+                if (error) throw error;
 
-                const tableDoc = docs.find(doc => doc.type === "table");
-
-                if (tableDoc && Array.isArray(tableDoc.data)) {
-                    setTestimonials(tableDoc.data);
-                } else {
-                    setTestimonials([]);
-                }
+                setTestimonials(data || []);
             } catch (error) {
                 console.error("Error fetching testimonials:", error);
             }

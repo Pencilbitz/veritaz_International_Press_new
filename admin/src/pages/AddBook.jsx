@@ -10,16 +10,9 @@ import {
 } from 'react-icons/md';
 import axios from 'axios';
 import { languagesList, bindingTypes } from '../data/dummyData';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc
-} from "firebase/firestore";
+import { supabase } from "../lib/supabase";
 
-import { db } from "../json_data/firebase";
-
-import { uploadImage } from "../json_data/cloudinary";
+import { uploadImage } from "../lib/storage";
 
 const steps = [
   { id: 1, label: 'Basic Info', icon: MdInfo },
@@ -52,10 +45,10 @@ const AddBook = () => {
         [type]: preview,
       }));
 
-      // Upload to Cloudinary
+      // Upload to Supabase Storage
       const imageUrl = await uploadImage(file);
 
-      // Save Cloudinary URL directly
+      // Save Storage URL directly
       setCovers((prev) => ({
         ...prev,
         [type]: imageUrl,
@@ -186,30 +179,9 @@ const AddBook = () => {
 
   const saveBook = async (book) => {
 
-    const snapshot = await getDocs(collection(db, "books (5)"));
+    const { error } = await supabase.from("veritaz_books").insert(book);
 
-    let tableDocId = "";
-    let books = [];
-
-    snapshot.forEach((d) => {
-
-      const docData = d.data();
-
-      if (Array.isArray(docData.data)) {
-        tableDocId = d.id;
-        books = docData.data;
-      }
-
-    });
-
-    books.push(book);
-
-    await updateDoc(
-      doc(db, "books (5)", tableDocId),
-      {
-        data: books
-      }
-    );
+    if (error) throw error;
 
   };
 

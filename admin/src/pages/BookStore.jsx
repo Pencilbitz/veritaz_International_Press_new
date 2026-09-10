@@ -16,13 +16,7 @@ import {
 } from 'react-icons/md';
 
 import { authorsList, yearsList } from '../data/dummyData';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 const BookStore = () => {
   const navigate = useNavigate();
@@ -45,19 +39,11 @@ const BookStore = () => {
     try {
       setIsLoading(true);
 
-      const snapshot = await getDocs(collection(db, "books (5)"));
+      const { data, error } = await supabase.from("veritaz_books").select("*");
 
-      let allBooks = [];
+      if (error) throw error;
 
-      snapshot.forEach((doc) => {
-        const docData = doc.data();
-
-        if (Array.isArray(docData.data)) {
-          allBooks.push(...docData.data);
-        }
-      });
-
-      setBooks(allBooks);
+      setBooks(data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -118,39 +104,19 @@ const BookStore = () => {
     if (!selectedBooks.length) return;
 
     try {
-      const snapshot = await getDocs(collection(db, "books (5)"));
-
-      let tableDocId = "";
-      let booksArray = [];
-
-      snapshot.forEach((d) => {
-        const data = d.data();
-        if (Array.isArray(data.data)) {
-          tableDocId = d.id;
-          booksArray = data.data;
-        }
-      });
-
-      if (!tableDocId) {
-        Swal.fire("Error", "Could not locate books document in database.", "error");
-        return;
-      }
-
-      // Convert all selected IDs to Strings for accurate comparison
       const selectedIds = selectedBooks.map(String);
 
-      // Filter out deleted books matching either b.id or b._id
-      const updatedBooksArray = booksArray.filter((b) => {
-        const bookId = String(b.id || b._id);
-        return !selectedIds.includes(bookId);
-      });
+      const { error } = await supabase
+        .from("veritaz_books")
+        .delete()
+        .in("id", selectedIds);
 
-      // Update Firestore document
-      await updateDoc(doc(db, "books (5)", tableDocId), {
-        data: updatedBooksArray
-      });
+      if (error) throw error;
 
-      // Update local state
+      const updatedBooksArray = books.filter(
+        (b) => !selectedIds.includes(String(b.id || b._id))
+      );
+
       setBooks(updatedBooksArray);
       setSelectedBooks([]);
 
@@ -173,38 +139,19 @@ const BookStore = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const snapshot = await getDocs(collection(db, "books (5)"));
+      const { error } = await supabase
+        .from("veritaz_books")
+        .delete()
+        .eq("id", String(id));
 
-      let tableDocId = "";
-      let booksArray = [];
+      if (error) throw error;
 
-      snapshot.forEach((d) => {
-        const data = d.data();
-        if (Array.isArray(data.data)) {
-          tableDocId = d.id;
-          booksArray = data.data;
-        }
-      });
-
-      if (!tableDocId) {
-        Swal.fire("Error", "Could not locate books document in database.", "error");
-        return;
-      }
-
-      // Filter out deleted book matching either b.id or b._id
-      const updatedBooksArray = booksArray.filter(
+      const updatedBooksArray = books.filter(
         (b) => String(b.id || b._id) !== String(id)
       );
 
-      // Update Firestore document
-      await updateDoc(doc(db, "books (5)", tableDocId), {
-        data: updatedBooksArray
-      });
-
-      // Update local UI state
       setBooks(updatedBooksArray);
 
-      // Clear ID from selected list if present
       setSelectedBooks((prev) => prev.filter((item) => String(item) !== String(id)));
 
       Swal.fire("Deleted!", "Book has been removed.", "success");

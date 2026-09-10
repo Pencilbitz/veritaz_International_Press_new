@@ -7,15 +7,7 @@ import {
   MdStar, MdFilterList, MdCloudUpload, MdPlayCircleOutline,
 } from 'react-icons/md';
 import axios from 'axios';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc,
-  writeBatch,
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 const StarDisplay = ({ rating }) => (
   <div className="flex items-center gap-0.5">
@@ -39,23 +31,16 @@ const Testimonials = () => {
     fetchTestimonials();
   }, []);
 
-  // Testimonials are spread across several documents in the "testimonials"
-  // collection, each holding a `data` array (see AddTestimonial.jsx). Read
-  // every doc and flatten their arrays into one list.
   const fetchTestimonials = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "testimonials"));
+      const { data, error } = await supabase
+        .from("veritaz_testimonials")
+        .select("*")
+        .order("id", { ascending: true });
 
-      let allTestimonials = [];
+      if (error) throw error;
 
-      snapshot.forEach((d) => {
-        const raw = d.data();
-        if (Array.isArray(raw.data)) {
-          allTestimonials.push(...raw.data);
-        }
-      });
-
-      setTestimonials(allTestimonials);
+      setTestimonials(data || []);
     } catch (err) {
       console.error("Error fetching testimonials:", err);
     }
@@ -80,34 +65,13 @@ const Testimonials = () => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  // Finds which doc in the collection holds the testimonial with the given
-  // id, and removes it from that doc's array, updating just that doc.
   const removeTestimonialById = async (id) => {
-    const snapshot = await getDocs(collection(db, "testimonials"));
+    const { error } = await supabase
+      .from("veritaz_testimonials")
+      .delete()
+      .eq("id", String(id));
 
-    let tableDocId = null;
-    let updatedArray = [];
-    let found = false;
-
-    snapshot.forEach((d) => {
-      const raw = d.data();
-      if (!Array.isArray(raw.data)) return;
-
-      const index = raw.data.findIndex((t) => String(t.id) === String(id));
-      if (index !== -1) {
-        found = true;
-        tableDocId = d.id;
-        updatedArray = raw.data.filter((t) => String(t.id) !== String(id));
-      }
-    });
-
-    if (!found) {
-      throw new Error("Testimonial not found.");
-    }
-
-    await updateDoc(doc(db, "testimonials", tableDocId), {
-      data: updatedArray,
-    });
+    if (error) throw error;
   };
 
   const handleDelete = async (id) => {
@@ -144,24 +108,16 @@ const Testimonials = () => {
     });
     if (result.isConfirmed) {
       try {
-        // Group affected ids by which doc actually holds them, then batch
-        // one array update per doc.
-        const snapshot = await getDocs(collection(db, "testimonials"));
-        const batch = writeBatch(db);
-        const selectedSet = new Set(selected.map(String));
+        const selectedIds = selected.map(String);
+        const selectedSet = new Set(selectedIds);
 
-        snapshot.forEach((d) => {
-          const raw = d.data();
-          if (!Array.isArray(raw.data)) return;
+        const { error } = await supabase
+          .from("veritaz_testimonials")
+          .delete()
+          .in("id", selectedIds);
 
-          const stillHasSelected = raw.data.some((t) => selectedSet.has(String(t.id)));
-          if (!stillHasSelected) return;
+        if (error) throw error;
 
-          const updatedArray = raw.data.filter((t) => !selectedSet.has(String(t.id)));
-          batch.update(doc(db, "testimonials", d.id), { data: updatedArray });
-        });
-
-        await batch.commit();
         setTestimonials((prev) => prev.filter((t) => !selectedSet.has(String(t.id))));
         setSelected([]);
         Swal.fire({ title: 'Done!', icon: 'success', timer: 1200, showConfirmButton: false });

@@ -15,8 +15,7 @@ import {
   Users,
   GraduationCap
 } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase, EVENT_SELECT } from "../lib/supabase";
 
 export default function UpcomingEvents() {
   const { eventId } = useParams();
@@ -26,32 +25,16 @@ export default function UpcomingEvents() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "events (2)"));
+        const { data: events, error } = await supabase
+          .from("veritaz_events")
+          .select(EVENT_SELECT);
 
-        console.log("Snapshot:", snapshot);
-        console.log("Number of documents:", snapshot.size);
-
-        let events = [];
-
-        snapshot.forEach((doc) => {
-          console.log("Document ID:", doc.id);
-          console.log("Document Data:", doc.data());
-
-          const docData = doc.data();
-
-          if (Array.isArray(docData.data)) {
-            console.log("Found data array:", docData.data);
-
-            events = [...events, ...docData.data];
-          } else {
-            console.log("No 'data' array in this document");
-          }
-        });
+        if (error) throw error;
 
         console.log("All Events:", events);
         console.log("Current eventId:", eventId);
 
-        const selectedEvent = events.find(
+        const selectedEvent = (events || []).find(
           (event) => String(event.id) === String(eventId)
         );
 

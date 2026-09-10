@@ -3,16 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { MdEvent, MdAdd, MdEdit, MdDelete, MdSearch, MdCloudUpload } from 'react-icons/md';
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  deleteDoc,
-  writeBatch,
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
+import { supabase, EVENT_SELECT } from "../lib/supabase";
 
 const Events = () => {
   const navigate = useNavigate();
@@ -23,19 +14,13 @@ const Events = () => {
 
   const fetchEvents = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "events (2)"));
+      const { data, error } = await supabase
+        .from("veritaz_events")
+        .select(EVENT_SELECT);
 
-      let eventsData = [];
+      if (error) throw error;
 
-      snapshot.forEach((doc) => {
-        const docData = doc.data();
-
-        if (Array.isArray(docData.data)) {
-          eventsData.push(...docData.data);
-        }
-      });
-
-      setEvents(eventsData);
+      setEvents(data || []);
     } catch (err) {
       console.error("Error fetching events:", err);
     }
@@ -59,29 +44,14 @@ const Events = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const snapshot = await getDocs(collection(db, "events (2)"));
+      const { error } = await supabase
+        .from("veritaz_events")
+        .delete()
+        .eq("id", String(id));
 
-      let firestoreDocId = "";
-      let eventsArray = [];
+      if (error) throw error;
 
-      snapshot.forEach((d) => {
-        const data = d.data();
-
-        if (Array.isArray(data.data)) {
-          firestoreDocId = d.id;
-          eventsArray = data.data;
-        }
-      });
-
-      const updatedEvents = eventsArray.filter(
-        (event) => String(event.id) !== String(id)
-      );
-
-      await updateDoc(doc(db, "events (2)", firestoreDocId), {
-        data: updatedEvents,
-      });
-
-      setEvents(updatedEvents);
+      setEvents((prev) => prev.filter((event) => String(event.id) !== String(id)));
 
       Swal.fire({
         title: "Deleted!",
@@ -96,7 +66,7 @@ const Events = () => {
   };
 
   const filtered = events.filter(e => {
-    const matchesSearch = !search || e.eventTitle.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = !search || (e.eventTitle || "").toLowerCase().includes(search.toLowerCase());
     const isCompleted = e.status === 'Completed';
     return activeTab === 'events' ? (!isCompleted && matchesSearch) : (isCompleted && matchesSearch);
   });
@@ -133,29 +103,18 @@ const Events = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const snapshot = await getDocs(collection(db, "events (2)"));
+      const idStrings = selectedIds.map(String);
 
-      let firestoreDocId = "";
-      let eventsArray = [];
+      const { error } = await supabase
+        .from("veritaz_events")
+        .delete()
+        .in("id", idStrings);
 
-      snapshot.forEach((d) => {
-        const data = d.data();
+      if (error) throw error;
 
-        if (Array.isArray(data.data)) {
-          firestoreDocId = d.id;
-          eventsArray = data.data;
-        }
-      });
-
-      const updatedEvents = eventsArray.filter(
-        (event) => !selectedIds.includes(event.id)
+      setEvents((prev) =>
+        prev.filter((event) => !idStrings.includes(String(event.id)))
       );
-
-      await updateDoc(doc(db, "events (2)", firestoreDocId), {
-        data: updatedEvents,
-      });
-
-      setEvents(updatedEvents);
       setSelectedIds([]);
 
       Swal.fire({

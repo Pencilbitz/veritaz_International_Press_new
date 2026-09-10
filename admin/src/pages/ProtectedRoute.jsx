@@ -1,20 +1,25 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { auth } from "../json_data/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { supabase } from "../lib/supabase";
 
 export default function ProtectedRoute({ children }) {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
     });
 
-    return unsubscribe;
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Firebase is still checking login status
+  // Still checking login status
   if (user === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center">

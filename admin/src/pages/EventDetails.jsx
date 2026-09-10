@@ -5,15 +5,8 @@ import Swal from 'sweetalert2';
 import axios from 'axios';
 import { MdChevronLeft, MdSave } from 'react-icons/md';
 import UploadBox from '../components/UploadBox';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
-import { uploadImage } from "../json_data/cloudinary"
+import { supabase, EVENT_SELECT, toEventRow } from "../lib/supabase";
+import { uploadImage } from "../lib/storage"
 
 const format12Hour = (time24) => {
   if (!time24) return '';
@@ -58,23 +51,13 @@ const EventDetails = () => {
 
     const fetchEvent = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "events (2)"));
+        const { data: e, error } = await supabase
+          .from("veritaz_events")
+          .select(EVENT_SELECT)
+          .eq("id", String(id))
+          .maybeSingle();
 
-        let tableDocId = "";
-        let events = [];
-
-        snapshot.forEach((d) => {
-          const data = d.data();
-
-          if (Array.isArray(data.data)) {
-            tableDocId = d.id;
-            events = data.data;
-          }
-        });
-
-        const e = events.find(
-          (item) => String(item.id) === String(id)
-        );
+        if (error) throw error;
 
         if (!e) return;
 
@@ -135,8 +118,6 @@ const EventDetails = () => {
         uploadedPosterUrl = await uploadImage(posterFile);
       }
 
-      // Upload to Cloudinary here if posterFile exists
-      // uploadedPosterUrl = returnedCloudinaryURL;
 
       let combinedTime = "";
 
@@ -162,52 +143,19 @@ const EventDetails = () => {
         certificate: uploadedCertificateUrl
       };
 
-      const snapshot = await getDocs(collection(db, "events (2)"));
-
-      let tableDocId = "";
-      let events = [];
-
-      snapshot.forEach((d) => {
-        const docData = d.data();
-
-        if (Array.isArray(docData.data)) {
-          tableDocId = d.id;
-          events = docData.data;
-        }
-      });
+      const row = toEventRow(payload);
 
       if (isNew) {
-        events.push(payload);
+        const { error } = await supabase.from("veritaz_events").insert(row);
+        if (error) throw error;
       } else {
-        const index = events.findIndex(
-          (e) => String(e.id) === String(id)
-        );
-
-        if (index !== -1) {
-          events[index] = payload;
-        }
+        delete row.id;
+        const { error } = await supabase
+          .from("veritaz_events")
+          .update(row)
+          .eq("id", String(id));
+        if (error) throw error;
       }
-
-      const cleanedEvents = events.map((event) => ({
-        id: event.id || "",
-        collegeName: event.collegeName || "",
-        topic: event.topic || "",
-        date: event.date || "",
-        time: event.time || "",
-        location: event.location || "",
-        contact1: event.contact1 || "",
-        contact2: event.contact2 || "",
-        registrationLink: event.registrationLink || "",
-        registerButtonText: event.registerButtonText || "Register Now",
-        status: event.status || "Upcoming",
-        poster: event.poster || "",
-        certificate: event.certificate || ""
-      }));
-
-      await updateDoc(doc(db, "events (2)", tableDocId), {
-        data: cleanedEvents
-
-      });
 
 
       Swal.fire({

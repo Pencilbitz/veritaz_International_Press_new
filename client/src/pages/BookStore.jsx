@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Search, Barcode } from "lucide-react";
 import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 export default function BookStore() {
   const [books, setBooks] = useState([]);
@@ -11,29 +10,14 @@ export default function BookStore() {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "books (5)"));
+        const { data, error } = await supabase
+          .from("veritaz_books")
+          .select("*")
+          .eq("status", "In Stock");
 
-        let books = [];
+        if (error) throw error;
 
-        snapshot.forEach((doc) => {
-          const docData = doc.data();
-
-          // If your Firestore stores the books inside a data array
-          if (Array.isArray(docData.data)) {
-            books.push(...docData.data);
-          }
-        });
-
-        console.log("All Books:", books);
-
-        // Filter only In Stock books
-        const inStockBooks = books.filter(
-          (book) => book.status === "In Stock"
-        );
-
-        console.log("In Stock Books:", inStockBooks);
-
-        setBooks(inStockBooks);
+        setBooks(data || []);
       } catch (err) {
         console.error("Error fetching books:", err);
       }

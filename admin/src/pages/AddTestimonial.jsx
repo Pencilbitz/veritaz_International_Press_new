@@ -6,20 +6,10 @@ import Swal from 'sweetalert2';
 import { MdStar, MdArrowBack, MdSend, MdPerson, MdPlayCircleOutline } from 'react-icons/md';
 import axios from 'axios';
 import UploadBox from '../components/UploadBox';
-import {
-  doc,
-  getDocs,
-  setDoc,
-  collection,
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
-import { uploadImage } from "../json_data/cloudinary";
+import { supabase } from "../lib/supabase";
+import { uploadImage } from "../lib/storage";
 
 const MAX_CHARS = 1000;
-
-// New testimonials are added into this document's `data` array.
-const NEW_TESTIMONIAL_DOC_ID = "hC8wovLkX6ryzHzNN5th";
 
 const formatTimestamp = (date) => {
   const pad = (n) => n.toString().padStart(2, '0');
@@ -60,20 +50,13 @@ const AddTestimonial = () => {
 
     const fetchTestimonial = async () => {
       try {
-        // Testimonials are stored as `data` arrays spread across several
-        // documents in the "testimonials" collection, so we search all of
-        // them for the entry whose own `id` field matches the URL param.
-        const snapshot = await getDocs(collection(db, "testimonials"));
+        const { data: testimonial, error } = await supabase
+          .from("veritaz_testimonials")
+          .select("*")
+          .eq("id", String(id))
+          .maybeSingle();
 
-        let testimonial = null;
-
-        snapshot.forEach((d) => {
-          const raw = d.data();
-          if (Array.isArray(raw.data)) {
-            const match = raw.data.find((t) => String(t.id) === String(id));
-            if (match) testimonial = match;
-          }
-        });
+        if (error) throw error;
 
         if (!testimonial) {
           Swal.fire("Error", "Testimonial not found", "error");
@@ -138,60 +121,35 @@ const AddTestimonial = () => {
           : "",
       };
 
-      // Every testimonial doc's `data` array lives across the collection,
-      // so read all of it up front — needed both to locate the entry being
-      // edited and to compute a fresh unique id for a new one.
-      const snapshot = await getDocs(collection(db, "testimonials"));
-
-      let targetDocId = null;
-      let targetArray = [];
-      let maxId = 0;
-      let found = false;
-
-      snapshot.forEach((d) => {
-        const raw = d.data();
-        if (!Array.isArray(raw.data)) return;
-
-        raw.data.forEach((t) => {
-          const numericId = Number(t.id);
-          if (!Number.isNaN(numericId) && numericId > maxId) {
-            maxId = numericId;
-          }
-        });
-
-        if (isEdit) {
-          const index = raw.data.findIndex((t) => String(t.id) === String(id));
-          if (index !== -1) {
-            found = true;
-            targetDocId = d.id;
-            targetArray = [...raw.data];
-            targetArray[index] = { ...targetArray[index], ...testimonialData, id };
-          }
-        }
-
-        if (!isEdit && d.id === NEW_TESTIMONIAL_DOC_ID) {
-          targetDocId = d.id;
-          targetArray = [...raw.data];
-        }
-      });
-
       if (isEdit) {
-        if (!found) {
-          throw new Error("Testimonial not found for editing.");
-        }
+        const { error } = await supabase
+          .from("veritaz_testimonials")
+          .update(testimonialData)
+          .eq("id", String(id));
+
+        if (error) throw error;
       } else {
-        // Add: push a new entry with a fresh unique id into the designated doc
+        // Compute a fresh unique numeric-string id (max existing + 1).
+        const { data: existing, error: readErr } = await supabase
+          .from("veritaz_testimonials")
+          .select("id");
+
+        if (readErr) throw readErr;
+
+        const maxId = (existing || []).reduce((m, t) => {
+          const n = Number(t.id);
+          return !Number.isNaN(n) && n > m ? n : m;
+        }, 0);
+
         testimonialData.id = String(maxId + 1);
         testimonialData.created_at = formatTimestamp(new Date());
-        targetDocId = NEW_TESTIMONIAL_DOC_ID;
-        targetArray.push(testimonialData);
-      }
 
-      await setDoc(
-        doc(db, "testimonials", targetDocId),
-        { data: targetArray },
-        { merge: true }
-      );
+        const { error } = await supabase
+          .from("veritaz_testimonials")
+          .insert(testimonialData);
+
+        if (error) throw error;
+      }
 
       Swal.fire({
         title: "Success!",

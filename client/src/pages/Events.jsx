@@ -6,8 +6,7 @@ import CompletedEvents from "../components/CompletedEvents";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase, EVENT_SELECT } from "../lib/supabase";
 
 
 export default function Events() {
@@ -16,20 +15,14 @@ export default function Events() {
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const snapshot = await getDocs(collection(db, "events (2)"));
+                const { data, error } = await supabase
+                    .from("veritaz_events")
+                    .select(EVENT_SELECT);
 
-                let events = [];
+                if (error) throw error;
 
-                snapshot.forEach((doc) => {
-                    const docData = doc.data();
-
-                    if (Array.isArray(docData.data)) {
-                        events = [...events, ...docData.data];
-                    }
-                });
-
-                console.log("Events:", events);
-                setEvents(events);
+                console.log("Events:", data);
+                setEvents(data || []);
             } catch (err) {
                 console.error("Error fetching events:", err);
             }

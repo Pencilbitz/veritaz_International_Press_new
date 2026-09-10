@@ -8,22 +8,11 @@ import {
 } from 'react-icons/md';
 import { inquiriesData as initialData } from '../data/dummyData';
 import UploadBox from '../components/UploadBox';
-import {
-  collection,
-  getDocs,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  query,
-  orderBy,
-} from "firebase/firestore";
+import { supabase } from "../lib/supabase";
+import { uploadImage } from "../lib/storage";
 
-import { db } from "../json_data/firebase";
-import { uploadImage } from "../json_data/cloudinary";
-
-const TEAM_DOC_ID = "uMoNnFpI06K7JOX0HFfI";
+const INQUIRY_SELECT =
+  "id, name, email, phone, message, formType:form_type, status, date:created_at, created_at";
 const MeetOurTeam = () => {
   const [activeTab, setActiveTab] = useState('inquiries');
 
@@ -45,16 +34,14 @@ const MeetOurTeam = () => {
 
   const fetchInquiries = async () => {
     try {
-      const q = query(collection(db, "inquiries"), orderBy("date", "desc"));
+      const { data, error } = await supabase
+        .from("veritaz_inquiries")
+        .select(INQUIRY_SELECT)
+        .order("created_at", { ascending: false });
 
-      const snapshot = await getDocs(q);
+      if (error) throw error;
 
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-
-      setInquiries(data);
+      setInquiries(data || []);
     } catch (error) {
       console.error(error);
     }
@@ -73,7 +60,12 @@ const MeetOurTeam = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await deleteDoc(doc(db, "inquiries", id));
+      const { error } = await supabase
+        .from("veritaz_inquiries")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
 
       setInquiries(prev => prev.filter(item => item.id !== id));
 
@@ -91,9 +83,12 @@ const MeetOurTeam = () => {
 
   const handleUpdateStatus = async (id, newStatus) => {
     try {
-      await updateDoc(doc(db, "inquiries", id), {
-        status: newStatus
-      });
+      const { error } = await supabase
+        .from("veritaz_inquiries")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) throw error;
 
       setInquiries(prev =>
         prev.map(item =>
@@ -121,15 +116,14 @@ const MeetOurTeam = () => {
 
   const fetchTeam = async () => {
     try {
-      const snap = await getDoc(
-        doc(db, "team_contacts", TEAM_DOC_ID)
-      );
+      const { data, error } = await supabase
+        .from("veritaz_team_contacts")
+        .select("*")
+        .order("id", { ascending: true });
 
-      if (snap.exists()) {
-        setTeamContacts(snap.data().data || []);
-      } else {
-        setTeamContacts([]);
-      }
+      if (error) throw error;
+
+      setTeamContacts(data || []);
     } catch (err) {
       console.error(err);
     }
@@ -173,29 +167,12 @@ const MeetOurTeam = () => {
 
     try {
 
-      const snap = await getDoc(
-        doc(db, "team_contacts", TEAM_DOC_ID)
-      );
+      const { error } = await supabase
+        .from("veritaz_team_contacts")
+        .delete()
+        .eq("id", String(id));
 
-      let contacts = [];
-
-      if (snap.exists()) {
-        contacts = [...(snap.data().data || [])];
-      }
-
-      contacts = contacts.filter(
-        item => String(item.id) !== String(id)
-      );
-
-      await setDoc(
-        doc(db, "team_contacts", TEAM_DOC_ID),
-        {
-          data: contacts
-        },
-        {
-          merge: true
-        }
-      );
+      if (error) throw error;
 
       await fetchTeam();
 
@@ -236,61 +213,49 @@ const MeetOurTeam = () => {
         photo = await uploadImage(photoFile);
       }
 
-      const snap = await getDoc(
-        doc(db, "team_contacts", TEAM_DOC_ID)
-      );
-
-      let contacts = [];
-
-      if (snap.exists()) {
-        contacts = [...(snap.data().data || [])];
-      }
-
-      let maxId = contacts.reduce(
-        (max, item) => Math.max(max, Number(item.id) || 0),
-        0
-      );
-
       if (contactForm.id) {
 
-        const index = contacts.findIndex(
-          c => String(c.id) === String(contactForm.id)
-        );
-
-        if (index !== -1) {
-          contacts[index] = {
-            ...contacts[index],
+        const { error } = await supabase
+          .from("veritaz_team_contacts")
+          .update({
             name: contactForm.name,
             designation: contactForm.designation,
             phone: contactForm.phone,
             email: contactForm.email,
             photo
-          };
-        }
+          })
+          .eq("id", String(contactForm.id));
+
+        if (error) throw error;
 
       } else {
 
-        contacts.push({
-          id: String(maxId + 1),
-          created_at: new Date().toISOString(),
-          name: contactForm.name,
-          designation: contactForm.designation,
-          phone: contactForm.phone,
-          email: contactForm.email,
-          photo
-        });
+        const { data: existing, error: readErr } = await supabase
+          .from("veritaz_team_contacts")
+          .select("id");
+
+        if (readErr) throw readErr;
+
+        const maxId = (existing || []).reduce(
+          (max, item) => Math.max(max, Number(item.id) || 0),
+          0
+        );
+
+        const { error } = await supabase
+          .from("veritaz_team_contacts")
+          .insert({
+            id: String(maxId + 1),
+            created_at: new Date().toISOString(),
+            name: contactForm.name,
+            designation: contactForm.designation,
+            phone: contactForm.phone,
+            email: contactForm.email,
+            photo
+          });
+
+        if (error) throw error;
 
       }
-
-      await setDoc(
-        doc(db, "team_contacts", TEAM_DOC_ID),
-        {
-          data: contacts
-        },
-        {
-          merge: true
-        }
-      );
 
       Swal.fire({
         title: contactForm.id ? "Updated!" : "Added!",

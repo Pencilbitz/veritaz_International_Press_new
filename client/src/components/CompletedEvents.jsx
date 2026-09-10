@@ -13,11 +13,14 @@ export default function CompletedEvents({ events = [] }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
           {events.map((event, index) => {
-            // Parse dynamic speakers array stored as JSON string in the backend database
+            // speakerContact may be an array, a plain string, or a JSON-encoded string
             let speakersArray = [];
-            if (event.speakerContact) {
+            if (Array.isArray(event.speakerContact)) {
+              speakersArray = event.speakerContact;
+            } else if (event.speakerContact) {
               try {
-                speakersArray = JSON.parse(event.speakerContact);
+                const parsed = JSON.parse(event.speakerContact);
+                speakersArray = Array.isArray(parsed) ? parsed : [parsed];
               } catch (e) {
                 speakersArray = [event.speakerContact];
               }

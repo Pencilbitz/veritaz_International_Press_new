@@ -7,8 +7,7 @@ import {
   MdPeopleOutline, MdClose, MdBusiness
 } from 'react-icons/md';
 import { FaWhatsapp, FaPhoneAlt, FaEnvelope } from 'react-icons/fa';
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 
 export default function BookDetails() {
   const { slug } = useParams(); // Maps to the unique book title-id slug[cite: 3]
@@ -26,17 +25,13 @@ export default function BookDetails() {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "books (5)"));
+        const { data, error: sbError } = await supabase
+          .from("veritaz_books")
+          .select("*");
 
-        let books = [];
+        if (sbError) throw sbError;
 
-        snapshot.forEach((doc) => {
-          const docData = doc.data();
-
-          if (Array.isArray(docData.data)) {
-            books.push(...docData.data);
-          }
-        });
+        const books = data || [];
 
         console.log("All Books:", books);
         console.log("URL Param:", slug);

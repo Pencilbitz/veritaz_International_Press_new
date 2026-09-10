@@ -5,15 +5,8 @@ import {
   MdSave, MdOutlineMenuBook,
   MdPeopleOutline, MdCancel, MdStar
 } from 'react-icons/md';
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc
-} from "firebase/firestore";
-
-import { db } from "../json_data/firebase";
-import { uploadImage } from "../json_data/cloudinary";
+import { supabase } from "../lib/supabase";
+import { uploadImage } from "../lib/storage";
 
 const BookDetails = () => {
   const { id } = useParams();
@@ -51,20 +44,13 @@ const BookDetails = () => {
   useEffect(() => {
     const fetchBook = async () => {
       try {
-        const snapshot = await getDocs(collection(db, "books (5)"));
+        const { data: book, error: sbError } = await supabase
+          .from("veritaz_books")
+          .select("*")
+          .eq("id", String(id))
+          .maybeSingle();
 
-        let books = [];
-
-        snapshot.forEach((d) => {
-          const data = d.data();
-          if (Array.isArray(data.data)) {
-            books = data.data;
-          }
-        });
-
-        const book = books.find(
-          (b) => String(b.id) === String(id)
-        );
+        if (sbError) throw sbError;
 
         if (!book) {
           setError("Book not found");
@@ -141,50 +127,30 @@ const BookDetails = () => {
     try {
       const updatedData = { ...formData };
 
-      // Upload Cover 1 to Cloudinary
+      // Upload Cover 1 to Supabase Storage
       if (uploadFiles.cover1) {
         updatedData.cover1 = await uploadImage(uploadFiles.cover1);
       }
 
-      // Upload Cover 2 to Cloudinary
+      // Upload Cover 2 to Supabase Storage
       if (uploadFiles.cover2) {
         updatedData.cover2 = await uploadImage(uploadFiles.cover2);
       }
 
-      const snapshot = await getDocs(collection(db, "books (5)"));
-
-      let tableDocId = "";
-      let books = [];
-
-      snapshot.forEach((d) => {
-        const data = d.data();
-        if (Array.isArray(data.data)) {
-          tableDocId = d.id;
-          books = data.data;
-        }
-      });
-
-      const index = books.findIndex(
-        (b) => String(b.id) === String(id)
-      );
-
-      if (index === -1) {
-        throw new Error("Book not found in database array");
-      }
-
       const updatedBook = {
-        ...books[index],
         ...updatedData,
         ratings: Number(updatedData.ratings) || 5,
         price: Number(updatedData.price) || 0,
         pages: Number(updatedData.pages) || 0,
       };
+      delete updatedBook.id;
 
-      books[index] = updatedBook;
+      const { error } = await supabase
+        .from("veritaz_books")
+        .update(updatedBook)
+        .eq("id", String(id));
 
-      await updateDoc(doc(db, "books (5)", tableDocId), {
-        data: books
-      });
+      if (error) throw error;
 
       alert("Book updated successfully!");
       navigate("/admin/books");

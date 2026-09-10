@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { signOut } from "firebase/auth";
-import { auth } from "../json_data/firebase";
+import { supabase } from "../lib/supabase";
 import { useNavigate } from "react-router-dom";
 
 export default function Logout() {
@@ -8,7 +7,7 @@ export default function Logout() {
 
   useEffect(() => {
     const logout = async () => {
-      await signOut(auth);
+      await supabase.auth.signOut();
       navigate("/", { replace: true });
     };
 
