@@ -21,7 +21,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // The veritaz_events table uses snake_case columns; the admin UI reads the
 // original camelCase Firestore field names, so alias them back on every select.
 export const EVENT_SELECT =
-  "id, collegeName:college_name, topic, eventTitle:topic, date:date_text, time:time_text, status, location, contact1, contact2, registrationLink:registration_link, registerButtonText:register_button_text, poster, certificate, speakerContact:speaker_contact, created_at";
+  "id, collegeName:college_name, topic, eventTitle:topic, date:date_text, time:time_text, status, location, state, contact1, contact2, registrationLink:registration_link, registerButtonText:register_button_text, poster, certificate, speakerContact:speaker_contact, created_at";
 
 // Maps a camelCase event object (as used by the admin forms) to the
 // snake_case column names for insert/update into veritaz_events.
@@ -33,6 +33,7 @@ export function toEventRow(e) {
     time_text: e.time ?? null,
     status: e.status ?? null,
     location: e.location ?? null,
+    state: e.state ?? null,
     contact1: e.contact1 ?? null,
     contact2: e.contact2 ?? null,
     registration_link: e.registrationLink ?? null,

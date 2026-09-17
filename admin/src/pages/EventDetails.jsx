@@ -31,6 +31,21 @@ const format24Hour = (time12) => {
   return `${hStr}:${m}`;
 };
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// Combines the From/To date pickers into the same free-text style already
+// used across the event data, e.g. "15 - 19 Jun 2026" or "27 Mar - 01 Apr 2026".
+const formatDateRange = (fromISO, toISO) => {
+  if (!fromISO) return '';
+  const [fy, fm, fd] = fromISO.split('-').map(Number);
+  if (!toISO || toISO === fromISO) {
+    return `${String(fd).padStart(2, '0')} ${MONTHS[fm - 1]} ${fy}`;
+  }
+  const [ty, tm, td] = toISO.split('-').map(Number);
+  const fromStr = `${String(fd).padStart(2, '0')}${fm === tm ? '' : ' ' + MONTHS[fm - 1]}`;
+  return `${fromStr} - ${String(td).padStart(2, '0')} ${MONTHS[tm - 1]} ${ty}`;
+};
+
 const EventDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -38,6 +53,7 @@ const EventDetails = () => {
 
   const [posterUrl, setPosterUrl] = useState("");
   const [certificateUrl, setCertificateUrl] = useState("");
+  const [existingDateText, setExistingDateText] = useState("");
 
   const [posterFile, setPosterFile] = useState(null);
 
@@ -78,16 +94,20 @@ const EventDetails = () => {
         reset({
           collegeName: e.collegeName || "",
           topic: e.topic || "",
-          date: e.date || "",
+          fromDate: "",
+          toDate: "",
           fromTime: fromT,
           toTime: toT,
           location: e.location || "",
+          state: e.state || "",
           contact1: e.contact1 || "",
           contact2: e.contact2 || "",
           registrationLink: e.registrationLink || "",
           registerButtonText: e.registerButtonText || "Register Now",
           status: e.status || "Upcoming"
         });
+
+        setExistingDateText(e.date || "");
 
         if (e.poster) {
           setPosterUrl(e.poster);
@@ -127,13 +147,20 @@ const EventDetails = () => {
         combinedTime = format12Hour(data.fromTime);
       }
 
+      // Only replace the stored date text if the admin actually picked new
+      // dates — otherwise keep whatever was already there untouched.
+      const combinedDate = data.fromDate
+        ? formatDateRange(data.fromDate, data.toDate)
+        : existingDateText;
+
       const payload = {
         id: isNew ? Date.now().toString() : id,
         collegeName: data.collegeName,
         topic: data.topic,
-        date: data.date,
+        date: combinedDate,
         time: combinedTime,
         location: data.location,
+        state: data.state,
         contact1: data.contact1,
         contact2: data.contact2,
         registrationLink: data.registrationLink,
@@ -257,9 +284,28 @@ const EventDetails = () => {
                 placeholder="Enter event topic"
               />
             </div>
-            <div>
-              <label className="label">Date</label>
-              <input type="text" {...register('date')} className="input-field" />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="label">From Date</label>
+                <input
+                  type="date"
+                  {...register('fromDate')}
+                  className="input-field"
+                />
+              </div>
+              <div>
+                <label className="label">To Date</label>
+                <input
+                  type="date"
+                  {...register('toDate')}
+                  className="input-field"
+                />
+              </div>
+              {existingDateText && (
+                <p className="col-span-2 text-xs text-brand-gray -mt-2">
+                  Currently: <span className="font-medium">{existingDateText}</span> — pick new dates above to change it, or leave blank to keep it.
+                </p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -279,12 +325,20 @@ const EventDetails = () => {
                 />
               </div>
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <label className="label">Location</label>
               <input
                 {...register('location')}
                 className="input-field"
-                placeholder="e.g. Potinamallayyapalem, Andhra Pradesh"
+                placeholder="e.g. Potinamallayyapalem"
+              />
+            </div>
+            <div>
+              <label className="label">State</label>
+              <input
+                {...register('state')}
+                className="input-field"
+                placeholder="e.g. Andhra Pradesh"
               />
             </div>
 

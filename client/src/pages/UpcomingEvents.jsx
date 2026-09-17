@@ -160,7 +160,7 @@ export default function UpcomingEvents() {
                     <div>
                       <p className="text-sm font-semibold text-slate-400">Date</p>
                       <h4 className="font-bold text-slate-800 text-sm">
-                        {event.date ? new Date(event.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Flexible Dates'}
+                        {event.date || 'Flexible Dates'}
                       </h4>
                     </div>
                   </div>

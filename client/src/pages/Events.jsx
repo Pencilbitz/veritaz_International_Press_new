@@ -7,10 +7,14 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { supabase, EVENT_SELECT } from "../lib/supabase";
+import { sortByEventDate } from "../lib/eventDate";
+import StateFilterBar from "../components/StateFilterBar";
 
 
 export default function Events() {
     const [events, setEvents] = useState([]);
+    const [upcomingStateFilter, setUpcomingStateFilter] = useState("");
+    const [completedStateFilter, setCompletedStateFilter] = useState("");
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -31,8 +35,21 @@ export default function Events() {
         fetchEvents();
     }, []);
 
-    const upcomingEvents = events.filter(e => e.status !== "Completed");
-    const completedEvents = events.filter(e => e.status === "Completed");
+    const upcomingEventsRaw = events.filter(e => e.status !== "Completed");
+    const completedEventsRaw = events.filter(e => e.status === "Completed");
+
+    const upcomingStates = [...new Set(upcomingEventsRaw.map(e => e.state).filter(Boolean))].sort();
+    const completedStates = [...new Set(completedEventsRaw.map(e => e.state).filter(Boolean))].sort();
+
+    // Soonest first for upcoming, most recently completed first for completed
+    const upcomingEvents = sortByEventDate(
+        upcomingStateFilter ? upcomingEventsRaw.filter(e => e.state === upcomingStateFilter) : upcomingEventsRaw,
+        "asc"
+    );
+    const completedEvents = sortByEventDate(
+        completedStateFilter ? completedEventsRaw.filter(e => e.state === completedStateFilter) : completedEventsRaw,
+        "desc"
+    );
 
     useEffect(() => {
         document.title = "Academic Events & Conferences | Veritaz International";
@@ -85,6 +102,20 @@ export default function Events() {
                     <div className="w-24 h-1 bg-blue-600 rounded-full mx-auto mt-5"></div>
                 </div>
 
+                {upcomingEventsRaw.length > 0 && (
+                    <StateFilterBar
+                        states={upcomingStates}
+                        value={upcomingStateFilter}
+                        onChange={setUpcomingStateFilter}
+                    />
+                )}
+
+                {upcomingEvents.length === 0 ? (
+                    <div className="text-center py-16">
+                        <p className="text-xl font-semibold text-gray-500">No Upcoming Events</p>
+                        <p className="text-gray-400 mt-2">Please check back soon for new event announcements.</p>
+                    </div>
+                ) : (
                 <div className="relative">
                     <Swiper
                         modules={[Navigation, Pagination, Autoplay]}
@@ -148,6 +179,7 @@ export default function Events() {
                         </svg>
                     </button>
                 </div>
+                )}
 
                 <div className="services-pagination mt-4 text-center"></div>
             </section>
@@ -168,7 +200,12 @@ export default function Events() {
                         <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-green-500 rounded-full mx-auto mt-6"></div>
                     </div>
 
-                    <CompletedEvents events={completedEvents} />
+                    <CompletedEvents
+                        events={completedEvents}
+                        states={completedStates}
+                        stateFilter={completedStateFilter}
+                        onStateFilterChange={setCompletedStateFilter}
+                    />
                 </div>
             </section>
         </div>

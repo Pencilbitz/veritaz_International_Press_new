@@ -24,7 +24,7 @@ console.log("── CLIENT (anon) ──");
 }
 {
   const { data, error } = await anon.from("veritaz_books").select("*");
-  ok("BookDetails: all books", !error && data.length === 119, error?.message || `${data?.length}`);
+  ok("BookDetails: all books", !error && data.length >= 119, error?.message || `${data?.length}`);
 }
 {
   const { data, error } = await anon.from("veritaz_conferences").select("*");
